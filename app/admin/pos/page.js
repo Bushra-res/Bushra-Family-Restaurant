@@ -199,43 +199,43 @@ export default function AdminPOS() {
             margin: 0; 
             padding: 4mm; 
             color: #000;
-            font-size: 10pt;
-            line-height: 1.3;
+            font-size: 10.5pt;
+            line-height: 1.4;
         }
         .center { text-align: center; }
         .bold { font-weight: 700; }
         .extra-bold { font-weight: 800; }
-        .line { border-top: 1px dashed #000; margin: 3mm 0; }
-        .header { font-size: 13pt; margin-bottom: 1mm; }
-        .info { font-size: 8.5pt; color: #333; }
-        .table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-top: 2mm; }
-        .table th { border-bottom: 1px solid #000; padding: 1.5mm 0; text-align: left; }
-        .table td { padding: 1.5mm 0; vertical-align: top; }
-        .total-row { display: flex; justify-content: space-between; font-size: 10pt; margin-top: 1mm; }
-        .qty { width: 12%; text-align: center; }
-        .price { width: 22%; text-align: right; }
-        .amt { width: 22%; text-align: right; }
-        img { max-height: 45px; width: auto; margin-bottom: 2mm; filter: grayscale(1); }
+        .line { border-top: 1.5px solid #000; margin: 3mm 0; }
+        .header { font-size: 14pt; margin-bottom: 1mm; }
+        .info { font-size: 9pt; color: #000; font-weight: 500; }
+        .table { width: 100%; border-collapse: collapse; font-size: 10pt; margin-top: 2mm; color: #000; }
+        .table th { border-bottom: 1.5px solid #000; padding: 2mm 0; text-align: left; font-weight: 800; }
+        .table td { padding: 2mm 0; vertical-align: top; font-weight: 700; }
+        .total-row { display: flex; justify-content: space-between; font-size: 11pt; margin-top: 1.5mm; color: #000; }
+        .qty { width: 15%; text-align: center !important; }
+        .price { width: 22%; text-align: right !important; }
+        .amt { width: 23%; text-align: right !important; }
+        img { max-height: 50px; width: auto; margin-bottom: 3mm; filter: contrast(2) grayscale(1); }
       </style></head><body>
       <div class="center">
         ${settings?.logoUrl ? `<img src="${settings.logoUrl}">` : ''}
         <div class="header extra-bold">${settings?.restaurantName || 'BUSHRA FAMILY RESTAURANT'}</div>
-        <div class="info">${settings?.billHeader || '496/2 Bangalore Main Road, SS Lodge Ground Floor, Chengam'}</div>
-        <div class="info">Ph: ${settings?.phone || '8838993915'}</div>
+        <div class="info bold">${settings?.billHeader || '496/2 Bangalore Main Road, SS Lodge Ground Floor, Chengam'}</div>
+        <div class="info bold">Ph: ${settings?.phone || '8838993915'}</div>
       </div>
       
       <div class="line"></div>
-      <div style="display:flex; justify-content:space-between; font-size:8.5pt;">
+      <div style="display:flex; justify-content:space-between; font-size:9.5pt;" class="bold">
         <span>Date: ${new Date(lastOrder.createdAt).toLocaleDateString()}</span>
         <span>Time: ${new Date(lastOrder.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
       </div>
-      <div style="font-size:9pt;" class="bold">Bill No: ${lastOrder.orderId}</div>
+      <div style="font-size:10pt;" class="extra-bold">Bill No: ${lastOrder.orderId}</div>
       <div class="line"></div>
       
       <table class="table">
         <thead>
           <tr>
-            <th style="width:44%">Item</th>
+            <th style="width:40%">Item</th>
             <th class="qty">Qty</th>
             <th class="price">Rate</th>
             <th class="amt">Amt</th>
@@ -244,10 +244,10 @@ export default function AdminPOS() {
         <tbody>
           ${lastOrder.items.map((i) => `
             <tr>
-              <td>${i.name}</td>
+              <td style="width:40%">${i.name}</td>
               <td class="qty">${i.quantity}</td>
               <td class="price">${i.price.toFixed(0)}</td>
-              <td class="amt bold">${(i.price * i.quantity).toFixed(0)}</td>
+              <td class="amt extra-bold">${(i.price * i.quantity).toFixed(0)}</td>
             </tr>
           `).join('')}
         </tbody>
