@@ -64,7 +64,8 @@ export default function AdminPOS() {
     }, []);
 
     const filteredItems = items.filter(item => {
-        const matchCat = selectedCategory === 'all' || item.category?._id === selectedCategory;
+        const itemCatId = (item.category && typeof item.category === 'object') ? item.category._id : item.category;
+        const matchCat = selectedCategory === 'all' || itemCatId === selectedCategory;
         const matchSearch = !search || item.name.toLowerCase().includes(search.toLowerCase());
         return matchCat && matchSearch;
     });
@@ -518,7 +519,7 @@ export default function AdminPOS() {
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-lg)' }}>
-                    {[{ v: 'cash', l: '💵 Cash' }, { v: 'card', l: '💳 Card' }, { v: 'digital', l: '📱 Digital' }].map(pm => (
+                    {[{ v: 'cash', l: '💵 Cash' }, { v: 'card', l: '💳 Card' }, { v: 'upi', l: '📱 UPI' }].map(pm => (
                         <button key={pm.v} onClick={() => setPaymentMethod(pm.v)}
                             className="card" style={{
                                 flex: 1, textAlign: 'center', cursor: 'pointer', padding: 'var(--space-md)',

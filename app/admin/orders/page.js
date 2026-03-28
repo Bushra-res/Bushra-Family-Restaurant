@@ -27,7 +27,7 @@ export default function AdminOrders() {
     const updateStatus = async (orderId, status) => {
         try {
             const res = await fetch(`/api/orders/${orderId}`, {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status }),
             });

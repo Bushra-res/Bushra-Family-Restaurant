@@ -18,72 +18,141 @@ export default function LoadingAnimation({ fullScreen = false }) {
     }, []);
 
     const content = (
-        <div className="logo-loader">
-            <div className="logo-container">
-                <img src={logo} alt="Loading..." className="pulsing-logo" 
-                    onError={(e) => { e.target.src = '/images/logo.png'; }} />
-                <div className="glow"></div>
+        <div className="premium-loader">
+            <div className="loader-container">
+                <div className="outer-ring"></div>
+                <div className="inner-ring"></div>
+                <div className="logo-box">
+                    <img src={logo} alt="Loading..." className="premium-logo" 
+                        onError={(e) => { e.target.src = '/images/logo.png'; }} />
+                </div>
+                <div className="glow-effect"></div>
             </div>
-            <p className="loading-text">BUSHRA FAMILY RESTAURANT</p>
+            <div className="text-container">
+                <h3 className="loading-title">BUSHRA</h3>
+                <div className="loading-bar">
+                    <div className="loading-progress"></div>
+                </div>
+            </div>
 
             <style jsx>{`
-                .logo-loader {
+                .premium-loader {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
+                    padding: 40px;
                 }
-                .logo-container {
+                .loader-container {
                     position: relative;
-                    width: 120px;
-                    height: 120px;
+                    width: 140px;
+                    height: 140px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    margin-bottom: 15px;
+                    margin-bottom: 24px;
                 }
-                .pulsing-logo {
-                    width: 90px;
-                    height: 90px;
-                    object-fit: contain;
-                    z-index: 2;
-                    animation: pulse-logo 2s ease-in-out infinite;
-                    filter: drop-shadow(0 0 10px rgba(0,0,0,0.1));
-                }
-                .glow {
+                .outer-ring {
                     position: absolute;
-                    width: 70px;
-                    height: 70px;
+                    width: 100%;
+                    height: 100%;
+                    border: 3px solid transparent;
+                    border-top-color: var(--accent-primary);
+                    border-bottom-color: var(--accent-primary);
+                    border-radius: 50%;
+                    animation: rotate 2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+                }
+                .inner-ring {
+                    position: absolute;
+                    width: 80%;
+                    height: 80%;
+                    border: 3px solid transparent;
+                    border-left-color: var(--accent-secondary, #f97316);
+                    border-right-color: var(--accent-secondary, #f97316);
+                    border-radius: 50%;
+                    animation: rotate-reverse 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+                    opacity: 0.5;
+                }
+                .logo-box {
+                    width: 80px;
+                    height: 80px;
+                    background: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                    animation: pulse 2s ease-in-out infinite;
+                    padding: 10px;
+                    overflow: hidden;
+                }
+                .premium-logo {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                }
+                .glow-effect {
+                    position: absolute;
+                    width: 100px;
+                    height: 100px;
                     background: var(--accent-primary);
                     border-radius: 50%;
-                    filter: blur(30px);
-                    opacity: 0.3;
+                    filter: blur(40px);
+                    opacity: 0.2;
                     z-index: 1;
-                    animation: pulse-glow 2s ease-in-out infinite;
+                    animation: glow-pulse 3s infinite;
                 }
-                .loading-text {
-                    font-weight: 800;
+                .text-container {
+                    text-align: center;
+                }
+                .loading-title {
+                    margin: 0;
+                    font-size: 20px;
+                    font-weight: 900;
+                    letter-spacing: 4px;
                     color: var(--text-primary);
-                    font-size: 12px;
-                    letter-spacing: 2px;
-                    text-transform: uppercase;
-                    opacity: 0.7;
-                    animation: text-shine 2s linear infinite;
-                    background: linear-gradient(to right, var(--text-primary) 20%, var(--accent-primary) 50%, var(--text-primary) 80%);
-                    background-size: 200% auto;
+                    background: linear-gradient(135deg, var(--text-primary), var(--accent-primary));
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
+                    margin-bottom: 12px;
                 }
-                @keyframes pulse-logo {
-                    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(249,115,22,0.2)); }
-                    50% { transform: scale(1.08); filter: drop-shadow(0 0 20px rgba(249,115,22,0.4)); }
+                .loading-bar {
+                    width: 120px;
+                    height: 4px;
+                    background: var(--border-light);
+                    border-radius: 10px;
+                    overflow: hidden;
+                    margin: 0 auto;
                 }
-                @keyframes pulse-glow {
-                    0%, 100% { transform: scale(1); opacity: 0.2; }
-                    50% { transform: scale(1.8); opacity: 0.5; }
+                .loading-progress {
+                    width: 30%;
+                    height: 100%;
+                    background: var(--accent-primary);
+                    border-radius: 10px;
+                    animation: progress-slide 1.5s ease-in-out infinite;
                 }
-                @keyframes text-shine {
-                    to { background-position: 200% center; }
+
+                @keyframes rotate {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                @keyframes rotate-reverse {
+                    from { transform: rotate(360deg); }
+                    to { transform: rotate(0deg); }
+                }
+                @keyframes pulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                }
+                @keyframes glow-pulse {
+                    0%, 100% { opacity: 0.1; transform: scale(0.8); }
+                    50% { opacity: 0.3; transform: scale(1.2); }
+                }
+                @keyframes progress-slide {
+                    0% { transform: translateX(-100%); width: 20%; }
+                    50% { width: 50%; }
+                    100% { transform: translateX(400%); width: 20%; }
                 }
             `}</style>
         </div>
@@ -105,7 +174,7 @@ export default function LoadingAnimation({ fullScreen = false }) {
     return (
         <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            minHeight: '300px', width: '100%'
+            minHeight: '400px', width: '100%'
         }}>
             {content}
         </div>
