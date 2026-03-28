@@ -192,45 +192,47 @@ export default function AdminPOS() {
       <html><head><title>Receipt - ${lastOrder.orderId}</title>
       <style>
         @page { margin: 0; }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
         body { 
-            font-family: 'Inter', sans-serif; 
+            font-family: 'Outfit', sans-serif; 
             width: 80mm; 
             margin: 0; 
-            padding: 4mm; 
+            padding: 5mm; 
             color: #000;
             font-size: 10.5pt;
             line-height: 1.4;
+            -webkit-font-smoothing: antialiased;
         }
         .center { text-align: center; }
         .bold { font-weight: 700; }
         .extra-bold { font-weight: 800; }
-        .line { border-top: 1.5px solid #000; margin: 3mm 0; }
-        .header { font-size: 14pt; margin-bottom: 1mm; }
-        .info { font-size: 9pt; color: #000; font-weight: 500; }
-        .table { width: 100%; border-collapse: collapse; font-size: 10pt; margin-top: 2mm; color: #000; }
-        .table th { border-bottom: 1.5px solid #000; padding: 2mm 0; text-align: left; font-weight: 800; }
-        .table td { padding: 2mm 0; vertical-align: top; font-weight: 700; }
-        .total-row { display: flex; justify-content: space-between; font-size: 11pt; margin-top: 1.5mm; color: #000; }
+        .line { border-top: 2px solid #000; margin: 3mm 0; }
+        .dashed-line { border-top: 1.2px dashed #444; margin: 2.5mm 0; }
+        .header { font-size: 16pt; margin-bottom: 1mm; letter-spacing: -0.5px; }
+        .info { font-size: 9.5pt; color: #000; font-weight: 600; line-height: 1.2; }
+        .table { width: 100%; border-collapse: collapse; font-size: 10pt; margin-top: 3mm; color: #000; }
+        .table th { border-bottom: 2px solid #000; padding: 2.5mm 0; text-align: left; font-weight: 800; text-transform: uppercase; font-size: 8.5pt; letter-spacing: 0.5px; }
+        .table td { padding: 2.5mm 0; vertical-align: top; font-weight: 600; }
+        .total-row { display: flex; justify-content: space-between; font-size: 11pt; margin-top: 2mm; color: #000; font-weight: 700; }
         .qty { width: 15%; text-align: center !important; }
         .price { width: 22%; text-align: right !important; }
         .amt { width: 23%; text-align: right !important; }
-        img { max-height: 50px; width: auto; margin-bottom: 3mm; filter: contrast(2) grayscale(1); }
+        img { max-height: 75px; max-width: 180px; width: auto; margin-bottom: 4mm; filter: contrast(1.2) grayscale(1); object-fit: contain; }
       </style></head><body>
       <div class="center">
         ${settings?.logoUrl ? `<img src="${settings.logoUrl}">` : ''}
         <div class="header extra-bold">${settings?.restaurantName || 'BUSHRA FAMILY RESTAURANT'}</div>
-        <div class="info bold">${settings?.billHeader || '496/2 Bangalore Main Road, SS Lodge Ground Floor, Chengam'}</div>
-        <div class="info bold">Ph: ${settings?.phone || '8838993915'}</div>
+        <div class="info">${settings?.billHeader || '496/2 Bangalore Main Road, SS Lodge Ground Floor, Chengam'}</div>
+        <div class="info">Ph: ${settings?.phone || '8838993915'}</div>
       </div>
       
       <div class="line"></div>
-      <div style="display:flex; justify-content:space-between; font-size:9.5pt;" class="bold">
+      <div style="display:flex; justify-content:space-between; font-size:9.5pt; margin-bottom: 1mm;" class="bold">
         <span>Date: ${new Date(lastOrder.createdAt).toLocaleDateString()}</span>
         <span>Time: ${new Date(lastOrder.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
       </div>
-      <div style="font-size:10pt;" class="extra-bold">Bill No: ${lastOrder.orderId}</div>
-      <div class="line"></div>
+      <div style="font-size:10.5pt;" class="extra-bold">Bill No: ${lastOrder.orderId}</div>
+      <div class="dashed-line"></div>
       
       <table class="table">
         <thead>
@@ -253,17 +255,17 @@ export default function AdminPOS() {
         </tbody>
       </table>
       
-      <div class="line"></div>
-      <div class="total-row"><span>Subtotal Total</span><span class="bold">₹ ${lastOrder.subtotal.toFixed(2)}</span></div>
+      <div class="dashed-line"></div>
+      <div class="total-row"><span>Subtotal Total</span><span>₹ ${lastOrder.subtotal.toFixed(2)}</span></div>
       ${lastOrder.tax > 0 ? `<div class="total-row"><span>GST</span><span>₹ ${lastOrder.tax.toFixed(2)}</span></div>` : ''}
       ${lastOrder.discount > 0 ? `<div class="total-row"><span>Discount</span><span>-₹ ${lastOrder.discount.toFixed(2)}</span></div>` : ''}
       
       <div class="line"></div>
-      <div class="total-row extra-bold" style="font-size:13pt; padding-top:1mm">
+      <div class="total-row extra-bold" style="font-size:14pt; padding-top:1mm">
         <span>TOTAL</span>
         <span>₹ ${lastOrder.total.toFixed(0)}</span>
       </div>
-      <div class="line" style="border-top-style: solid;"></div>
+      <div class="line"></div>
       
       <div class="center bold" style="font-size:9.5pt; margin-top:2mm; letter-spacing: 0.5px;">
         ${settings?.billFooter?.replace(/\\n/g, '<br>') || 'THANK YOU! VISIT AGAIN 🙏'}
