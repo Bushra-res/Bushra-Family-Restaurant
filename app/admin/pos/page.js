@@ -1,10 +1,5 @@
-'use client';
-import LoadingAnimation from '@/components/LoadingAnimation';
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useToast } from '@/components/Toast';
-import { formatCurrency, generateOrderId } from '@/lib/utils';
 import Modal from '@/components/Modal';
+import { db, cacheData, getCachedData } from '@/lib/offline-db';
 
 export default function AdminPOS() {
     const [items, setItems] = useState([]);
@@ -30,15 +25,36 @@ export default function AdminPOS() {
     const { addToast } = useToast();
 
     useEffect(() => {
-        Promise.all([
-            fetch('/api/menu').then(r => r.json()),
-            fetch('/api/categories').then(r => r.json()),
-            fetch('/api/tables').then(r => r.json()),
-            fetch('/api/settings').then(r => r.json()),
-        ]).then(([m, c, t, s]) => {
-            setItems(m || []); setCategories(c || []); setTables(t || []); setSettings(s);
-            setLoading(false);
-        }).catch(() => setLoading(false));
+        const loadInitialData = async () => {
+            try {
+                const [m, c, t, s] = await Promise.all([
+                    fetch('/api/menu').then(r => r.json()).catch(() => getCachedData('menuItems')),
+                    fetch('/api/categories').then(r => r.json()).catch(() => getCachedData('categories')),
+                    fetch('/api/tables').then(r => r.json()).catch(() => getCachedData('tables')),
+                    fetch('/api/settings').then(r => r.json()).catch(() => getCachedData('settings')),
+                ]);
+
+                setItems(m || []); setCategories(c || []); setTables(t || []); setSettings(s && s.length ? s[0] : s);
+                
+                // Update local cache for next offline run
+                if (navigator.onLine) {
+                    cacheData('menuItems', m);
+                    cacheData('categories', c);
+                    cacheData('tables', t);
+                    cacheData('settings', s);
+                }
+            } catch (err) {
+                console.error('Data load error:', err);
+                const [cm, cc, ct, cs] = await Promise.all([
+                    getCachedData('menuItems'), getCachedData('categories'),
+                    getCachedData('tables'), getCachedData('settings')
+                ]);
+                setItems(cm); setCategories(cc); setTables(ct); setSettings(cs[0] || cs);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadInitialData();
     }, []);
 
     const filteredItems = items.filter(item => {
@@ -84,6 +100,7 @@ export default function AdminPOS() {
             };
             const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(orderData) });
             const order = await res.json();
+            
             if (!res.ok) throw new Error(order.error);
 
             setLastOrder(order);
@@ -99,9 +116,30 @@ export default function AdminPOS() {
             addToast('Order placed!', 'success');
 
             // Refresh tables
-            const t = await fetch('/api/tables').then(r => r.json());
+            const t = await fetch('/api/tables').then(r => r.json()).catch(() => getCachedData('tables'));
             setTables(t || []);
-        } catch (err) { addToast(err.message, 'error'); }
+        } catch (err) { 
+            // Save to offline local DB if net is down
+            if (!navigator.onLine || err.message === 'Failed to fetch') {
+                const offlineId = `OFF-${Date.now()}`;
+                const offlineOrder = { ...orderData, orderId: offlineId, synced: 0, createdAt: new Date().toISOString() };
+                await db.offlineOrders.add(offlineOrder);
+                
+                setLastOrder(offlineOrder);
+                setShowPayment(false);
+                setShowReceipt(true);
+                setCart([]);
+                setDiscount(0);
+                setCustomerName('Walk-in Customer');
+                setCustomerPhone('');
+                setDeliveryAddress({ street: '', city: '', pincode: '' });
+                setNotes('');
+                setSelectedTable('');
+                addToast('Saved locally (Offline). Syncing later.', 'warning');
+            } else {
+                addToast(err.message, 'error'); 
+            }
+        }
     };
 
     const printReceipt = () => {
