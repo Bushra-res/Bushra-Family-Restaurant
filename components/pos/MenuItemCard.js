@@ -14,7 +14,11 @@ const MenuItemCard = ({ item, inCart, onAdd }) => {
                 cursor: 'pointer',
                 transition: 'var(--transition-fast)',
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: '180px',
+                height: '100%'
             }}>
             {inCart && (
                 <span className="qty-badge animate-bounceIn">{inCart.quantity}</span>
@@ -25,8 +29,8 @@ const MenuItemCard = ({ item, inCart, onAdd }) => {
                     <Image
                         src={item.image}
                         alt={item.name}
-                        width={125}
-                        height={100}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 150px"
                         style={{ objectFit: 'cover' }}
                         loading="lazy"
                     />
@@ -48,6 +52,7 @@ const MenuItemCard = ({ item, inCart, onAdd }) => {
                 }
                 .item-image-container {
                     height: 100px;
+                    width: 100%;
                     border-radius: var(--radius-sm);
                     margin-bottom: 8px;
                     background: var(--bg-glass-light);
@@ -57,6 +62,7 @@ const MenuItemCard = ({ item, inCart, onAdd }) => {
                     overflow: hidden;
                     border: 1px solid var(--border-light);
                     position: relative;
+                    flex-shrink: 0;
                 }
                 .item-code {
                     position: absolute;
@@ -96,11 +102,13 @@ const MenuItemCard = ({ item, inCart, onAdd }) => {
                     -webkit-line-clamp: 2;
                     -webkit-box-orient: vertical;
                     overflow: hidden;
+                    margin-top: 2px;
                 }
                 .item-price {
-                    fontWeight: 800;
-                    fontSize: var(--font-sm);
+                    font-weight: 800;
+                    font-size: var(--font-sm);
                     color: var(--accent-primary);
+                    margin-top: auto;
                 }
             `}</style>
         </div>

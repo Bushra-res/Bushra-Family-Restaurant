@@ -539,10 +539,10 @@ export default function AdminPOS() {
 
                 <div style={{
                     flex: 1, overflow: 'auto',
-                    display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))',
-                    gap: 'var(--space-sm)', alignContent: 'start',
+                    display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))',
+                    gap: 'var(--space-md)', alignContent: 'start',
                     paddingRight: '4px',
-                    paddingBottom: 'var(--space-xl)'
+                    paddingBottom: 'var(--space-2xl)'
                 }}>
                     {loading ? (
                         <MenuSkeleton />
