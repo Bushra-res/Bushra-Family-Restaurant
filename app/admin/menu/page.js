@@ -1,6 +1,6 @@
 'use client';
+import LoadingAnimation from '@/components/LoadingAnimation';
 import { useState, useEffect } from 'react';
-import { SkeletonRow } from '@/components/Skeleton';
 import Modal from '@/components/Modal';
 import { useToast } from '@/components/Toast';
 import { useConfirm } from '@/contexts/ConfirmContext';
@@ -22,13 +22,15 @@ export default function MenuManagement() {
     const [catForm, setCatForm] = useState({ name: '', description: '' });
 
     const fetchData = async () => {
-        // Staggered fetching for better perceived performance
-        fetch('/api/categories').then(r => r.json()).then(cats => setCategories(cats || []));
-        fetch('/api/menu?all=true').then(r => r.json()).then(menuItems => {
-            setItems(menuItems || []);
-            setLoading(false);
-        });
-        fetch('/api/settings').then(r => r.json()).then(settingsRes => setSettings(settingsRes || {}));
+        const [cats, menuItems, settingsRes] = await Promise.all([
+            fetch('/api/categories').then(r => r.json()),
+            fetch('/api/menu?all=true').then(r => r.json()),
+            fetch('/api/settings').then(r => r.json()),
+        ]);
+        setCategories(cats || []);
+        setItems(menuItems || []);
+        setSettings(settingsRes || {});
+        setLoading(false);
     };
 
     useEffect(() => { fetchData(); }, []);
@@ -154,6 +156,8 @@ export default function MenuManagement() {
         };
     };
 
+    if (loading) return <LoadingAnimation />;
+
     return (
         <div className="animate-fadeIn">
             <div className="page-header">
@@ -196,11 +200,7 @@ export default function MenuManagement() {
                             </tr>
                         </thead>
                         <tbody>
-                            {loading ? (
-                                Array(8).fill(0).map((_, i) => (
-                                    <tr key={i}><td colSpan="8"><SkeletonRow /></td></tr>
-                                ))
-                            ) : items.map(item => (
+                            {items.map(item => (
                                 <tr key={item._id}>
                                     <td><span className="badge badge-secondary" style={{ fontWeight: 800 }}>{item.code || '-'}</span></td>
                                     <td>

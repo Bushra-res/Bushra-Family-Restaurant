@@ -56,7 +56,6 @@ export async function POST(req) {
         const orderData = {
             ...data,
             items: normalizedItems,
-            parcelCharges: data.parcelCharges || null,
             orderType,
             paymentStatus,
             orderId, // Sequential Bill Number

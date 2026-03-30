@@ -11,8 +11,6 @@ const SettingsSchema = new mongoose.Schema({
   taxPercentage: { type: Number, default: 5 },
   currency: { type: String, default: 'INR' },
   logoUrl: { type: String },
-  containerPrice: { type: Number, default: 0 },
-  gravyPrice: { type: Number, default: 0 },
   workingHours: {
     open: String,
     close: String

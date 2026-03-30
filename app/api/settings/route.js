@@ -1,17 +1,15 @@
-import Settings from "@/models/Settings";
-import dbConnect from "@/lib/mongodb";
+import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        await dbConnect();
-        const settings = await Settings.findOne({}).lean();
+        const settings = await db.findOne('settings', {});
         return NextResponse.json(settings || { 
             restaurantName: 'BUSHRA FAMILY RESTAURANT',
-            billHeader: '⭐ Halal Certified | Premium Dining ⭐\n📍 496/2 Bangalore Main Road,\nSS Lodge Ground Floor, Chengam - 606 709\n📞 8838993915 | 9361066673',
-            phone: '8838993915, 9361066673',
-            billFooter: '🎉 THANK YOU FOR DINING WITH US! 🎉\n❤️ We hope you enjoyed your meal',
-            taxPercentage: 5
+            billHeader: '496/2 Bangalore Main Road,\nSS Lodge Ground Floor,\nChengam - 606 709',
+            phone: '8838993915, 7603947276\n9361060673',
+            billFooter: 'THANK YOU!\nVisit Us Again 🙏',
+            taxPercentage: 0
         });
     } catch (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
@@ -20,22 +18,18 @@ export async function GET() {
 
 export async function POST(req) {
     try {
-        await dbConnect();
-        const body = await req.json();
-        const { _id, __v, createdAt, updatedAt, ...data } = body;
+        const data = await req.json();
+        const existing = await db.findOne('settings', {});
         
-        let settings = await Settings.findOne({});
-        
-        if (settings) {
-            Object.assign(settings, data);
-            await settings.save();
+        if (existing) {
+            await db.update('settings', { _id: existing._id }, data);
+            const updated = await db.findById('settings', existing._id);
+            return NextResponse.json(updated);
         } else {
-            settings = await Settings.create(data);
+            const newSettings = await db.insert('settings', data);
+            return NextResponse.json(newSettings);
         }
-        
-        return NextResponse.json(settings);
     } catch (error) {
-        console.error('Settings API Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
