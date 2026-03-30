@@ -17,13 +17,21 @@ export default function InventoryPage() {
     const emptyItem = { name: '', quantity: '', unit: 'kg', minStockLevel: 10, costPerUnit: '', supplier: '' };
     const [form, setForm] = useState(emptyItem);
     const [supplierForm, setSupplierForm] = useState({ name: '', contact: '', email: '', phone: '', address: '' });
+    const [parcelPrices, setParcelPrices] = useState({ containerPrice: 0, gravyPrice: 0 });
+    const [savingPrices, setSavingPrices] = useState(false);
+    const [rawSettings, setRawSettings] = useState(null);
 
     const fetchData = async () => {
-        const [inv, sups] = await Promise.all([
+        const [inv, sups, sets] = await Promise.all([
             fetch('/api/inventory').then(r => r.json()),
             fetch('/api/suppliers').then(r => r.json()),
+            fetch('/api/settings').then(r => r.json()),
         ]);
-        setItems(inv || []); setSuppliers(sups || []); setLoading(false);
+        setItems(inv || []); 
+        setSuppliers(sups || []); 
+        setRawSettings(sets);
+        if (sets) setParcelPrices({ containerPrice: sets.containerPrice || 0, gravyPrice: sets.gravyPrice || 0 });
+        setLoading(false);
     };
 
     useEffect(() => { fetchData(); }, []);
@@ -71,6 +79,27 @@ export default function InventoryPage() {
         addToast('Supplier added', 'success'); setShowSupplierModal(false); setSupplierForm({ name: '', contact: '', email: '', phone: '', address: '' }); fetchData();
     };
 
+    const saveParcelPrices = async () => {
+        setSavingPrices(true);
+        try {
+            const dataToSave = rawSettings ? { ...rawSettings, ...parcelPrices } : parcelPrices;
+            const res = await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataToSave)
+            });
+            if (res.ok) {
+                addToast('Parcel prices updated', 'success');
+            } else {
+                addToast('Failed to update prices', 'error');
+            }
+        } catch (error) {
+            addToast('An error occurred', 'error');
+        } finally {
+            setSavingPrices(false);
+        }
+    };
+
     const lowStock = items.filter(i => i.quantity <= i.minStockLevel);
     if (loading) return <LoadingAnimation />;
 
@@ -85,6 +114,43 @@ export default function InventoryPage() {
                     <button onClick={() => setShowSupplierModal(true)} className="btn btn-secondary">+ Supplier</button>
                     <button onClick={() => { setEditing(null); setForm(emptyItem); setShowModal(true); }} className="btn btn-primary">+ Add Stock</button>
                 </div>
+            </div>
+
+            <div className="card" style={{ marginBottom: 'var(--space-lg)', padding: 'var(--space-md)' }}>
+                <h3 style={{ fontSize: 'var(--font-sm)', fontWeight: 700, marginBottom: 'var(--space-md)', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>🥡 Global Parcel Pricing</h3>
+                <div className="grid grid-4" style={{ alignItems: 'flex-end', gap: 'var(--space-md)' }}>
+                    <div className="input-group">
+                        <label style={{ fontSize: 'var(--font-xs)' }}>Container Price (₹)</label>
+                        <input 
+                            type="number" 
+                            step="0.01" 
+                            value={parcelPrices.containerPrice} 
+                            onChange={e => setParcelPrices({...parcelPrices, containerPrice: parseFloat(e.target.value) || 0})}
+                        />
+                    </div>
+                    <div className="input-group">
+                        <label style={{ fontSize: 'var(--font-xs)' }}>Gravy Cup Price (₹)</label>
+                        <input 
+                            type="number" 
+                            step="0.01" 
+                            value={parcelPrices.gravyPrice} 
+                            onChange={e => setParcelPrices({...parcelPrices, gravyPrice: parseFloat(e.target.value) || 0})}
+                        />
+                    </div>
+                    <div className="input-group">
+                        <button 
+                            className="btn btn-primary" 
+                            onClick={saveParcelPrices}
+                            disabled={savingPrices}
+                            style={{ width: '100%' }}
+                        >
+                            {savingPrices ? 'Saving...' : 'Update Prices'}
+                        </button>
+                    </div>
+                </div>
+                <p style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-sm)' }}>
+                    Note: These prices are shared with the Settings page and used in the POS cart for parcel orders.
+                </p>
             </div>
 
             {lowStock.length > 0 && (
