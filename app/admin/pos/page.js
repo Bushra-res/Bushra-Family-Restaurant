@@ -361,6 +361,14 @@ export default function AdminPOS() {
                 .tabs::-webkit-scrollbar { display: none; }
                 .tab { padding: 8px 16px; border-radius: var(--radius-sm); background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); font-size: var(--font-xs); font-weight: 600; white-space: nowrap; cursor: pointer; transition: 0.2s; }
                 .tab.active { background: var(--gradient-primary); border-color: transparent; color: white; box-shadow: 0 4px 12px rgba(249,115,22,0.2); }
+                
+                .payment-mode-btn:hover { 
+                    background: var(--m-bg-hover) !important; 
+                    border-color: var(--m-color) !important; 
+                    transform: translateY(-4px); 
+                    box-shadow: 0 10px 20px -5px var(--m-shadow); 
+                }
+                .payment-mode-btn:active { transform: scale(0.95); }
             `}</style>
 
             {/* Left: Menu */}
@@ -515,15 +523,6 @@ export default function AdminPOS() {
                                     {m.label.toUpperCase()}
                                 </button>
                             ))}
-                            <style jsx>{`
-                                .payment-mode-btn:hover { 
-                                    background: var(--m-bg-hover) !important; 
-                                    border-color: var(--m-color) !important; 
-                                    transform: translateY(-4px); 
-                                    box-shadow: 0 10px 20px -5px var(--m-shadow); 
-                                }
-                                .payment-mode-btn:active { transform: scale(0.95); }
-                            `}</style>
                         </div>
                     </div>
                 ) : (
