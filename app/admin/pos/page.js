@@ -88,6 +88,7 @@ export default function AdminPOS() {
     const [lastOrder, setLastOrder] = useState(null);
     const [settings, setSettings] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [printCountdown, setPrintCountdown] = useState(0);
     
     // Parcel Options State
     const [parcelOptions, setParcelOptions] = useState({
@@ -258,6 +259,26 @@ export default function AdminPOS() {
             }
         }
     };
+
+    // Auto-print bill after 3s delay when order is successful
+    useEffect(() => {
+        if (lastOrder && !lastOrder.orderId.startsWith('OFF-')) {
+            setPrintCountdown(3);
+            const interval = setInterval(() => {
+                setPrintCountdown(prev => {
+                    if (prev <= 1) {
+                        clearInterval(interval);
+                        printReceipt();
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(interval);
+        } else {
+            setPrintCountdown(0);
+        }
+    }, [lastOrder]);
 
     const sendWhatsAppBill = () => {
         if (!lastOrder) return;
@@ -642,7 +663,14 @@ export default function AdminPOS() {
                         <div style={{ fontSize: 40 }}>🎉</div>
                         <h3>Order #{lastOrder.orderId}</h3>
                         <div style={{ fontSize: 24, fontWeight: 800, margin: '15px 0' }}>₹{lastOrder.total.toFixed(2)}</div>
-                        <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                        
+                        {printCountdown > 0 && (
+                            <div style={{ fontSize: 'var(--font-xs)', color: 'var(--accent-primary)', fontWeight: 700, marginBottom: 15, animation: 'pulse 1s infinite' }}>
+                                🖨️ Printing automatically in {printCountdown}s...
+                            </div>
+                        )}
+
+                        <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
                             <button onClick={printReceipt} className="btn btn-primary" style={{ flex: 1 }}>🖨️ Print Bill</button>
                             <button onClick={sendWhatsAppBill} className="btn btn-secondary" style={{ flex: 1 }}>💬 WhatsApp</button>
                         </div>
