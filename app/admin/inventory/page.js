@@ -116,25 +116,33 @@ export default function InventoryPage() {
                 </div>
             </div>
 
-            <div className="card" style={{ marginBottom: 'var(--space-lg)', padding: 'var(--space-md)' }}>
-                <h3 style={{ fontSize: 'var(--font-sm)', fontWeight: 700, marginBottom: 'var(--space-md)', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>🥡 Global Parcel Pricing</h3>
-                <div className="grid grid-4" style={{ alignItems: 'flex-end', gap: 'var(--space-md)' }}>
+            <div className="card" style={{ marginBottom: 'var(--space-lg)', padding: 'var(--space-md)', border: '1px solid var(--accent-primary)', background: 'linear-gradient(145deg, var(--bg-card), rgba(249, 115, 22, 0.05))' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
+                    <span style={{ fontSize: '1.5rem' }}>🥡</span>
+                    <div>
+                        <h3 style={{ fontSize: 'var(--font-sm)', fontWeight: 800, margin: 0, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Parcel & Packaging Charges</h3>
+                        <p style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', margin: 0 }}>These prices are applied automatically to parcel orders in the POS cart.</p>
+                    </div>
+                </div>
+                <div className="grid grid-3" style={{ alignItems: 'flex-end', gap: 'var(--space-md)' }}>
                     <div className="input-group">
-                        <label style={{ fontSize: 'var(--font-xs)' }}>Container Price (₹)</label>
+                        <label style={{ fontSize: 'var(--font-xs)', fontWeight: 600 }}>Container Price (₹)</label>
                         <input 
                             type="number" 
                             step="0.01" 
                             value={parcelPrices.containerPrice} 
                             onChange={e => setParcelPrices({...parcelPrices, containerPrice: parseFloat(e.target.value) || 0})}
+                            style={{ borderColor: 'rgba(249, 115, 22, 0.3)' }}
                         />
                     </div>
                     <div className="input-group">
-                        <label style={{ fontSize: 'var(--font-xs)' }}>Gravy Cup Price (₹)</label>
+                        <label style={{ fontSize: 'var(--font-xs)', fontWeight: 600 }}>Gravy Cup Price (₹)</label>
                         <input 
                             type="number" 
                             step="0.01" 
                             value={parcelPrices.gravyPrice} 
                             onChange={e => setParcelPrices({...parcelPrices, gravyPrice: parseFloat(e.target.value) || 0})}
+                            style={{ borderColor: 'rgba(249, 115, 22, 0.3)' }}
                         />
                     </div>
                     <div className="input-group">
@@ -142,15 +150,12 @@ export default function InventoryPage() {
                             className="btn btn-primary" 
                             onClick={saveParcelPrices}
                             disabled={savingPrices}
-                            style={{ width: '100%' }}
+                            style={{ width: '100%', height: '42px', fontWeight: 700 }}
                         >
-                            {savingPrices ? 'Saving...' : 'Update Prices'}
+                            {savingPrices ? 'Updating...' : 'Update Prices'}
                         </button>
                     </div>
                 </div>
-                <p style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-sm)' }}>
-                    Note: These prices are shared with the Settings page and used in the POS cart for parcel orders.
-                </p>
             </div>
 
             {lowStock.length > 0 && (

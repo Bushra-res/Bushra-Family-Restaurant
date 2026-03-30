@@ -2,18 +2,17 @@
 import { useState, useEffect } from 'react';
 import { SkeletonInput } from '@/components/Skeleton';
 import { useToast } from '@/components/Toast';
+import Link from 'next/link';
 
 export default function SettingsPage() {
     const [settings, setSettings] = useState({
+        restaurantName: '',
         billHeader: '',
         billFooter: '',
         taxPercentage: 0,
         gstin: '',
         phone: '',
-        restaurantName: '',
-        logoUrl: '',
-        containerPrice: 0,
-        gravyPrice: 0
+        logoUrl: ''
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -47,12 +46,10 @@ export default function SettingsPage() {
                     errorMsg = err.error || errorMsg;
                 } catch (e) {
                     if (res.status === 413) errorMsg = 'Image/Logo is too large! Please use a smaller file.';
-                    console.error('Save failed:', e);
                 }
                 addToast(errorMsg, 'error');
             }
         } catch (error) {
-            console.error('Fetch error:', error);
             addToast('Network error or server timeout', 'error');
         } finally {
             setSaving(false);
@@ -64,27 +61,30 @@ export default function SettingsPage() {
             <div className="page-header">
                 <div>
                     <h1>Settings</h1>
-                    <p className="subtitle">Configure system-wide restaurant settings</p>
+                    <p className="subtitle">Configure restaurant branding and bill design</p>
+                </div>
+                <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                    <Link href="/admin/users" className="btn btn-secondary">
+                        👥 User Management
+                    </Link>
                 </div>
             </div>
 
-            <div className="grid grid-2">
+            <div className="grid grid-2" style={{ gap: 'var(--space-xl)', alignItems: 'flex-start' }}>
+                {/* Branding Section */}
                 <div className="card">
-                    <h3 style={{ marginBottom: 'var(--space-md)' }}>🍽️ Restaurant Info</h3>
+                    <h3 style={{ marginBottom: 'var(--space-md)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        🏨 Restaurant Identity
+                    </h3>
                     <form onSubmit={handleSave} className="flex-col gap-md">
                         <div className="input-group">
-                            <label>Logo Preview</label>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-                                {settings.logoUrl ? (
-                                    <img src={settings.logoUrl} alt="Logo" style={{ height: 60, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }} />
-                                ) : (
-                                    <div style={{ height: 60, width: 60, background: 'var(--bg-glass-light)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🥣</div>
-                                )}
+                            <label>Logo</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-sm)' }}>
+                                {settings.logoUrl && <img src={settings.logoUrl} alt="Logo" style={{ width: 60, height: 60, objectFit: 'contain', borderRadius: 'var(--radius-sm)', background: 'white', padding: 5 }} />}
                                 <input type="file" accept="image/*" onChange={async (e) => {
                                     const file = e.target.files[0];
                                     if (file) {
                                         if (file.size > 2 * 1024 * 1024) return addToast('Image too large! Maximum 2MB.', 'error');
-                                        
                                         const reader = new FileReader();
                                         reader.readAsDataURL(file);
                                         reader.onload = () => {
@@ -107,14 +107,12 @@ export default function SettingsPage() {
                                 }} style={{ flex: 1, fontSize: 'var(--font-xs)' }} />
                             </div>
                         </div>
+
                         {loading ? (
                             <>
                                 <SkeletonInput />
                                 <SkeletonInput />
-                                <div className="grid grid-2">
-                                    <SkeletonInput />
-                                    <SkeletonInput />
-                                </div>
+                                <div className="grid grid-2"><SkeletonInput /><SkeletonInput /></div>
                             </>
                         ) : (
                             <>
@@ -144,16 +142,27 @@ export default function SettingsPage() {
                                         />
                                     </div>
                                 </div>
+                                <div className="input-group">
+                                    <label>Tax Percentage (%)</label>
+                                    <input 
+                                        type="number"
+                                        value={settings.taxPercentage}
+                                        onChange={e => setSettings({...settings, taxPercentage: parseFloat(e.target.value) || 0})}
+                                    />
+                                </div>
                             </>
                         )}
-                        <div className="mt-md">
-                            <button type="submit" className="btn btn-primary" disabled={saving}>
-                                {saving ? 'Saving...' : 'Save Info'}
-                            </button>
-                        </div>
+                        <button type="submit" className="btn btn-primary" disabled={saving || loading}>
+                            {saving ? 'Saving...' : 'Save Branding'}
+                        </button>
                     </form>
+                </div>
 
-                    <h3 style={{ margin: 'var(--space-xl) 0 var(--space-md) 0' }}>📜 Bill Design</h3>
+                {/* Bill Design Section */}
+                <div className="card">
+                    <h3 style={{ marginBottom: 'var(--space-md)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        📜 Receipt Details
+                    </h3>
                     <form onSubmit={handleSave} className="flex-col gap-md">
                         {loading ? (
                             <>
@@ -167,8 +176,8 @@ export default function SettingsPage() {
                                     <textarea 
                                         value={settings.billHeader}
                                         onChange={e => setSettings({...settings, billHeader: e.target.value})}
-                                        placeholder="Enter address and additional contact info..."
-                                        style={{ minHeight: 80 }}
+                                        placeholder="Enter address and Halal info..."
+                                        style={{ minHeight: 120, fontSize: 'var(--font-xs)', lineHeight: '1.4' }}
                                     />
                                     <p style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}>This appears at the top under the restaurant name.</p>
                                 </div>
@@ -178,112 +187,34 @@ export default function SettingsPage() {
                                         value={settings.billFooter}
                                         onChange={e => setSettings({...settings, billFooter: e.target.value})}
                                         placeholder="Enter thank you message..."
-                                        style={{ minHeight: 60 }}
+                                        style={{ minHeight: 80, fontSize: 'var(--font-xs)', lineHeight: '1.4' }}
                                     />
                                 </div>
                             </>
                         )}
-                        <div className="mt-md">
-                            <button type="submit" className="btn btn-primary" disabled={saving}>
-                                {saving ? 'Saving...' : 'Save Bill Design'}
-                            </button>
+                        
+                        <div className="info-box" style={{ background: 'rgba(249, 115, 22, 0.05)', padding: 'var(--space-sm)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(249, 115, 22, 0.1)' }}>
+                            <p style={{ fontSize: 'var(--font-xs)', margin: 0, color: 'var(--accent-primary)' }}>
+                                💡 <strong>Note:</strong> Parcel and Packaging prices have been moved to the <Link href="/admin/inventory" style={{ textDecoration: 'underline', fontWeight: 700 }}>Inventory Page</Link>.
+                            </p>
                         </div>
-                    </form>
-                </div>
 
-                <div className="card">
-                    <h3 style={{ marginBottom: 'var(--space-md)' }}>💸 Tax Configuration</h3>
-                    <form onSubmit={handleSave} className="flex-col gap-md">
-                        <div className="input-group">
-                            <label>Global Sales Tax (%)</label>
-                            <div className="flex items-center gap-sm">
-                                <input 
-                                    type="number" 
-                                    step="0.01"
-                                    value={settings.taxPercentage}
-                                    onChange={e => setSettings({...settings, taxPercentage: parseFloat(e.target.value) || 0})}
-                                    placeholder="0.00"
-                                    style={{ flex: 1 }}
-                                />
-                                <span style={{ fontWeight: 700 }}>%</span>
-                            </div>
-                            <p style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}>Applied to all orders unless item-specific tax is set.</p>
-                        </div>
-                        <div className="mt-md">
-                            <button type="submit" className="btn btn-primary" disabled={saving}>
-                                {saving ? 'Saving...' : 'Update Tax Rate'}
-                            </button>
-                        </div>
+                        <button type="submit" className="btn btn-primary" disabled={saving || loading}>
+                            {saving ? 'Saving...' : 'Save Bill Design'}
+                        </button>
                     </form>
-
-                    <h3 style={{ margin: 'var(--space-xl) 0 var(--space-md) 0' }}>🥡 Parcel & Packaging Charges</h3>
-                    <form onSubmit={handleSave} className="flex-col gap-md">
-                        <div className="grid grid-2">
-                            <div className="input-group">
-                                <label>Container Price (₹)</label>
-                                <input 
-                                    type="number" 
-                                    step="0.01"
-                                    value={settings.containerPrice}
-                                    onChange={e => setSettings({...settings, containerPrice: parseFloat(e.target.value) || 0})}
-                                    placeholder="0.00"
-                                />
-                            </div>
-                            <div className="input-group">
-                                <label>Gravy Cup Price (₹)</label>
-                                <input 
-                                    type="number" 
-                                    step="0.01"
-                                    value={settings.gravyPrice}
-                                    onChange={e => setSettings({...settings, gravyPrice: parseFloat(e.target.value) || 0})}
-                                    placeholder="0.00"
-                                />
-                            </div>
-                        </div>
-                        <p style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}>These prices will be available to add in the POS cart for parcel orders.</p>
-                        <div className="mt-md">
-                            <button type="submit" className="btn btn-primary" disabled={saving}>
-                                {saving ? 'Saving...' : 'Update Parcel Prices'}
-                            </button>
-                        </div>
-                    </form>
-
-                    <div className="mt-xl" style={{ 
-                        background: 'rgba(255,255,255,0.01)', 
-                        padding: 'var(--space-lg)', 
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--border)'
-                    }}>
-                        <h4 style={{ fontSize: 'var(--font-xs)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 'var(--space-md)', color: 'var(--text-muted)' }}>Receipt Preview</h4>
-                        <div style={{ 
-                            background: 'white', 
-                            color: 'black', 
-                            padding: 'var(--space-md)', 
-                            fontFamily: 'monospace', 
-                            fontSize: '11px',
-                            textAlign: 'center',
-                            whiteSpace: 'pre-wrap',
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
-                        }}>
-                            <div style={{ fontWeight: 'bold', fontSize: '14px' }}>{settings.restaurantName || 'RESTAURANT NAME'}</div>
-                            {settings.billHeader}
-                            {settings.phone && <div>PH: {settings.phone}</div>}
-                            {settings.gstin && <div>GST: {settings.gstin}</div>}
-                            <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px dashed #ccc' }} />
-                            <div style={{ textAlign: 'left' }}>
-                                ITEM 1           ₹100.00<br/>
-                                ITEM 2           ₹200.00<br/>
-                                <hr style={{ margin: '4px 0', border: 'none', borderTop: '1px solid #eee' }} />
-                                SUB-TOTAL        ₹300.00<br/>
-                                GST ({settings.taxPercentage}%)      ₹{(300 * settings.taxPercentage / 100).toFixed(2)}<br/>
-                                <strong>TOTAL            ₹{(300 * (1 + settings.taxPercentage / 100)).toFixed(2)}</strong>
-                            </div>
-                            <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px dashed #ccc' }} />
-                            {settings.billFooter}
-                        </div>
-                    </div>
                 </div>
             </div>
+
+            <style jsx>{`
+                .flex-col { display: flex; flexDirection: column; }
+                .gap-md { gap: var(--space-md); }
+                .mt-md { margin-top: var(--space-md); }
+                .grid-2 { display: grid; grid-template-columns: 1fr 1fr; }
+                @media (max-width: 768px) {
+                    .grid-2 { grid-template-columns: 1fr; }
+                }
+            `}</style>
         </div>
     );
 }

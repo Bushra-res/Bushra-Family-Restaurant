@@ -8,10 +8,10 @@ export async function GET() {
         const settings = await Settings.findOne({}).lean();
         return NextResponse.json(settings || { 
             restaurantName: 'BUSHRA FAMILY RESTAURANT',
-            billHeader: '496/2 Bangalore Main Road,\nSS Lodge Ground Floor,\nChengam - 606 709',
-            phone: '8838993915, 7603947276\n9361060673',
-            billFooter: 'THANK YOU!\nVisit Us Again 🙏',
-            taxPercentage: 0
+            billHeader: '⭐ Halal Certified | Premium Dining ⭐\n📍 496/2 Bangalore Main Road,\nSS Lodge Ground Floor, Chengam - 606 709\n📞 8838993915 | 9361066673',
+            phone: '8838993915, 9361066673',
+            billFooter: '🎉 THANK YOU FOR DINING WITH US! 🎉\n❤️ We hope you enjoyed your meal',
+            taxPercentage: 5
         });
     } catch (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
