@@ -7,7 +7,7 @@ export default function HomePage() {
     const router = useRouter();
 
     useEffect(() => {
-        router.push('/admin/dashboard');
+        router.push('/login');
     }, [router]);
 
     return (
