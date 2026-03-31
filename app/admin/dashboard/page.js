@@ -203,7 +203,19 @@ export default function AdminDashboard() {
                 </div>
             )}
 
-            <div className="grid grid-3" style={{ marginBottom: 'var(--space-xl)' }}>
+            <div className="grid grid-dashboard-main" style={{ marginBottom: 'var(--space-xl)' }}>
+                <style jsx>{`
+                    .grid-dashboard-main {
+                        display: grid;
+                        grid-template-columns: 1fr 2fr;
+                        gap: var(--space-lg);
+                    }
+                    @media (max-width: 992px) {
+                        .grid-dashboard-main {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+                `}</style>
                 {/* Fast Selling Product */}
                 <div className="card card-glass" style={{ 
                     position: 'relative', overflow: 'hidden', 
@@ -237,7 +249,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Top Items Table */}
-                <div className="card card-glass" style={{ gridColumn: 'span 2' }}>
+                <div className="card card-glass">
                     <h3 style={{ fontWeight: 700, marginBottom: 'var(--space-md)' }}>🔥 Top Performing Menu Items</h3>
                     <div style={{ maxHeight: 300, overflowY: 'auto', paddingRight: 8 }}>
                         {(report?.topItems || []).length === 0 ? (

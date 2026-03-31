@@ -253,8 +253,8 @@ export default function MenuManagement() {
 
 
             {/* Items Table */}
-            <div className="card" style={{ padding: 0, overflow: 'hidden', opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s' }}>
-                <div style={{ overflowX: 'auto' }}>
+            <div className="card" style={{ padding: 0, opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s' }}>
+                <div className="table-responsive">
                     <table className="data-table">
                         <thead>
                             <tr>

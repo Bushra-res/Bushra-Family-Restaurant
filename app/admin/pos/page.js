@@ -455,41 +455,31 @@ export default function AdminPOS() {
             <style jsx>{`
                 .pos-layout {
                     display: grid;
-                    grid-template-columns: 1fr 380px;
+                    grid-template-columns: 1fr 400px;
                     gap: var(--space-md);
-                    height: calc(100vh - 2 * var(--space-md));
+                    height: calc(100vh - 100px);
                     overflow: hidden;
                 }
 
                 @media (max-width: 1200px) {
                     .pos-layout {
-                        grid-template-columns: 1fr 320px;
+                        grid-template-columns: 1fr 340px;
                         gap: var(--space-sm);
                     }
                 }
 
-                @media (max-width: 900px) {
-                    .pos-layout {
-                        grid-template-columns: 1fr 280px;
-                        gap: var(--space-xs);
-                    }
-                }
-
-                    .cart-column {
-                        position: relative;
-                        height: 100% !important;
-                    }
-                }
-
-                @media (max-width: 600px) {
+                @media (max-width: 1024px) {
                     .pos-layout {
                         display: flex;
                         flex-direction: column;
+                        overflow-y: auto;
+                        height: auto;
+                        min-height: 100vh;
+                        padding-bottom: 200px; /* Space for sticky cart summary */
                     }
                     .cart-column {
-                        position: sticky;
-                        bottom: 0;
-                        max-height: 80vh;
+                        width: 100% !important;
+                        height: auto !important;
                     }
                 }
                 .tabs {

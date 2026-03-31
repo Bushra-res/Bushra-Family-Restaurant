@@ -163,42 +163,44 @@ export default function ExpensesPage() {
                     <span className="badge badge-info">{filteredExpenses.length} entries for this month</span>
                 </div>
                 
-                <table className="data-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Title / Description</th>
-                            <th>Category</th>
-                            <th>Amount</th>
-                            <th style={{ textAlign: 'right' }}>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredExpenses.map(exp => (
-                            <tr key={exp._id} className="animate-fadeIn">
-                                <td style={{ fontWeight: 500 }}>{new Date(exp.date).toLocaleDateString()}</td>
-                                <td>
-                                    <div style={{ fontWeight: 600 }}>{exp.title}</div>
-                                    {exp.note && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{exp.note}</div>}
-                                </td>
-                                <td><span className="badge badge-purple">{exp.category}</span></td>
-                                <td style={{ fontWeight: 800, color: 'var(--danger)', fontSize: '1.1rem' }}>
-                                    {formatCurrency(exp.amount)}
-                                </td>
-                                <td style={{ textAlign: 'right' }}>
-                                    <button 
-                                        className="btn btn-icon" 
-                                        onClick={() => handleDelete(exp._id)} 
-                                        style={{ color: 'var(--danger)', opacity: 0.7 }}
-                                        title="Delete Record"
-                                    >
-                                        🗑️
-                                    </button>
-                                </td>
+                <div className="table-responsive">
+                    <table className="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Title / Description</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th style={{ textAlign: 'right' }}>Actions</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {filteredExpenses.map(exp => (
+                                <tr key={exp._id} className="animate-fadeIn">
+                                    <td style={{ fontWeight: 500 }}>{new Date(exp.date).toLocaleDateString()}</td>
+                                    <td>
+                                        <div style={{ fontWeight: 600 }}>{exp.title}</div>
+                                        {exp.note && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{exp.note}</div>}
+                                    </td>
+                                    <td><span className="badge badge-purple">{exp.category}</span></td>
+                                    <td style={{ fontWeight: 800, color: 'var(--danger)', fontSize: '1.1rem' }}>
+                                        {formatCurrency(exp.amount)}
+                                    </td>
+                                    <td style={{ textAlign: 'right' }}>
+                                        <button 
+                                            className="btn btn-icon" 
+                                            onClick={() => handleDelete(exp._id)} 
+                                            style={{ color: 'var(--danger)', opacity: 0.7 }}
+                                            title="Delete Record"
+                                        >
+                                            🗑️
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
                 
                 {filteredExpenses.length === 0 && (
                     <div className="empty-state">

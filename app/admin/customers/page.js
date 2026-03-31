@@ -28,9 +28,15 @@ export default function CustomersPage() {
                 <div><h1>Customers</h1><p className="subtitle">{customers.length} registered customers</p></div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr' : '1fr', gap: 'var(--space-lg)' }}>
-                <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                    <table className="data-table">
+            <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr' : '1fr', gap: 'var(--space-lg)' }} className="responsive-split">
+                <style jsx>{`
+                    @media (max-width: 992px) {
+                        .responsive-split { display: flex !important; flex-direction: column !important; }
+                    }
+                `}</style>
+                <div className="card" style={{ padding: 0 }}>
+                    <div className="table-responsive">
+                        <table className="data-table">
                         <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Points</th><th>Joined</th></tr></thead>
                         <tbody>
                             {customers.map(c => (
@@ -45,6 +51,7 @@ export default function CustomersPage() {
                         </tbody>
                     </table>
                 </div>
+            </div>
 
                 {selected && (
                     <div className="card animate-slideUp">

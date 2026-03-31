@@ -54,7 +54,6 @@ export default function AdminLayout({ children }) {
                 top: 0, left: 0, right: 0,
                 height: 70,
                 background: '#ffffff',
-                backdropFilter: 'blur(15px)',
                 borderBottom: '1px solid var(--border)',
                 zIndex: 110,
                 padding: '0 var(--space-md)',
@@ -66,7 +65,7 @@ export default function AdminLayout({ children }) {
                     onClick={() => setIsSidebarOpen(true)}
                     className="btn btn-icon"
                     style={{ 
-                        background: 'rgba(249, 115, 22, 0.1)', 
+                        background: 'var(--accent-glow)', 
                         border: '1px solid rgba(249, 115, 22, 0.2)', 
                         fontSize: 24,
                         color: 'var(--accent-primary)',
@@ -98,11 +97,21 @@ export default function AdminLayout({ children }) {
                 onClick={() => setIsSidebarOpen(false)} 
             />
 
-            <main className="dashboard-content">
+            <main className="dashboard-content" style={{
+                marginLeft: 'var(--sidebar-width)',
+                padding: 'var(--space-xl)',
+                minHeight: '100vh',
+                transition: 'margin 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}>
                 <style jsx global>{`
                     @media (max-width: 992px) {
                         .mobile-header { display: flex !important; }
-                        .dashboard-content { padding-top: 80px !important; }
+                        .dashboard-content { 
+                            margin-left: 0 !important;
+                            padding-top: 90px !important;
+                            padding-left: var(--space-md) !important;
+                            padding-right: var(--space-md) !important;
+                        }
                     }
                 `}</style>
                 {children}

@@ -97,8 +97,11 @@ export default function Sidebar({ isOpen, onClose }) {
             <div style={{
                 padding: 'var(--space-lg)',
                 borderBottom: '1px solid var(--border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
             }}>
-                <Link href="/" style={{ textDecoration: 'none' }}>
+                <Link href="/" onClick={() => { if (window.innerWidth <= 992 && onClose) onClose(); }} style={{ textDecoration: 'none' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
                         <div style={{
                             width: 44,
@@ -129,11 +132,17 @@ export default function Sidebar({ isOpen, onClose }) {
                                 WebkitTextFillColor: 'transparent',
                                 lineHeight: 1
                             }}>BUSHRA<br /><span style={{ fontSize: 'var(--font-xs)' }}>Family Restaurant</span></div>
-                            <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}>{title}</span>
                         </div>
                     </div>
                 </Link>
+                <button onClick={onClose} className="mobile-only btn btn-icon" style={{ display: 'none', background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>✕</button>
             </div>
+
+            <style jsx>{`
+                @media (max-width: 992px) {
+                    .mobile-only { display: flex !important; }
+                }
+            `}</style>
 
             <nav style={{ padding: 'var(--space-sm) var(--space-md)', flex: 1 }}>
                 {activeGroups.map((group, gIdx) => (

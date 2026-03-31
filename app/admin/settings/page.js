@@ -132,16 +132,20 @@ export default function SettingsPage() {
                 display: 'flex', gap: '4px', padding: '4px',
                 background: 'var(--bg-input)', borderRadius: 'var(--radius-md)',
                 marginBottom: 'var(--space-lg)',
+                overflowX: 'auto',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
             }}>
                 {tabs.map(tab => (
                     <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                         style={{
-                            flex: 1, padding: '10px 16px', border: 'none', borderRadius: 'var(--radius-sm)',
+                            flex: '1 0 auto', padding: '10px 16px', border: 'none', borderRadius: 'var(--radius-sm)',
                             fontWeight: 600, fontSize: 'var(--font-sm)', cursor: 'pointer',
                             background: activeTab === tab.id ? 'var(--bg-secondary)' : 'transparent',
                             color: activeTab === tab.id ? 'var(--accent-primary)' : 'var(--text-secondary)',
                             boxShadow: activeTab === tab.id ? 'var(--shadow-sm)' : 'none',
                             transition: 'var(--transition-fast)',
+                            whiteSpace: 'nowrap'
                         }}>
                         {tab.label}
                     </button>

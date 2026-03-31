@@ -96,30 +96,32 @@ export default function InventoryPage() {
                 </div>
             )}
 
-            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <table className="data-table">
-                    <thead><tr><th>Item</th><th>Quantity</th><th>Unit</th><th>Min Level</th><th>Cost/Unit</th><th>Supplier</th><th>Last Restocked</th><th>Actions</th></tr></thead>
-                    <tbody>
-                        {items.map(item => (
-                            <tr key={item._id}>
-                                <td style={{ fontWeight: 600 }}>{item.name}</td>
-                                <td><span className={`badge ${item.quantity <= item.minStockLevel ? 'badge-danger' : 'badge-success'}`}>{item.quantity}</span></td>
-                                <td>{item.unit}</td>
-                                <td>{item.minStockLevel}</td>
-                                <td>₹{item.costPerUnit || 0}</td>
-                                <td>{item.supplier?.name || '-'}</td>
-                                <td style={{ fontSize: 'var(--font-xs)' }}>{formatDate(item.lastRestocked)}</td>
-                                <td>
-                                    <div style={{ display: 'flex', gap: 'var(--space-xs)' }}>
-                                        <button onClick={() => handleWhatsAppOrder(item)} className="btn btn-ghost btn-sm" title="Order via WhatsApp" style={{ color: '#25D366' }}>💬</button>
-                                        <button onClick={() => { setEditing(item); setForm({ ...item, supplier: item.supplier?._id || '' }); setShowModal(true); }} className="btn btn-ghost btn-sm" title="Edit">✏️</button>
-                                        <button onClick={() => handleDelete(item._id)} className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} title="Delete">🗑️</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+            <div className="card" style={{ padding: 0 }}>
+                <div className="table-responsive">
+                    <table className="data-table">
+                        <thead><tr><th>Item</th><th>Quantity</th><th>Unit</th><th>Min Level</th><th>Cost/Unit</th><th>Supplier</th><th>Last Restocked</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            {items.map(item => (
+                                <tr key={item._id}>
+                                    <td style={{ fontWeight: 600 }}>{item.name}</td>
+                                    <td><span className={`badge ${item.quantity <= item.minStockLevel ? 'badge-danger' : 'badge-success'}`}>{item.quantity}</span></td>
+                                    <td>{item.unit}</td>
+                                    <td>{item.minStockLevel}</td>
+                                    <td>₹{item.costPerUnit || 0}</td>
+                                    <td>{item.supplier?.name || '-'}</td>
+                                    <td style={{ fontSize: 'var(--font-xs)' }}>{formatDate(item.lastRestocked)}</td>
+                                    <td>
+                                        <div style={{ display: 'flex', gap: 'var(--space-xs)' }}>
+                                            <button onClick={() => handleWhatsAppOrder(item)} className="btn btn-ghost btn-sm" title="Order via WhatsApp" style={{ color: '#25D366' }}>💬</button>
+                                            <button onClick={() => { setEditing(item); setForm({ ...item, supplier: item.supplier?._id || '' }); setShowModal(true); }} className="btn btn-ghost btn-sm" title="Edit">✏️</button>
+                                            <button onClick={() => handleDelete(item._id)} className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} title="Delete">🗑️</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editing ? 'Edit Stock' : 'Add Stock'}>
