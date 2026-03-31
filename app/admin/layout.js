@@ -53,7 +53,7 @@ export default function AdminLayout({ children }) {
                 position: 'fixed',
                 top: 0, left: 0, right: 0,
                 height: 70,
-                background: 'var(--bg-glass)',
+                background: '#ffffff',
                 backdropFilter: 'blur(15px)',
                 borderBottom: '1px solid var(--border)',
                 zIndex: 110,

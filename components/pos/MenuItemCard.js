@@ -45,17 +45,21 @@ const MenuItemCard = ({ item, inCart, onAdd }) => {
             <div className="item-price">₹{item.price}</div>
 
             <style jsx>{`
+                .menu-item-card {
+                    background: ${inCart ? 'var(--accent-glow)' : '#ffffff'} !important;
+                    box-shadow: ${inCart ? '0 0 0 2px var(--accent-primary)' : 'var(--shadow-sm)'} !important;
+                }
                 .menu-item-card:hover {
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-                    border-color: var(--accent-primary);
-                    transform: translateY(-1px);
+                    box-shadow: var(--shadow-md) !important;
+                    border-color: var(--accent-primary) !important;
+                    transform: translateY(-2px);
                 }
                 .item-image-container {
-                    height: 100px;
+                    height: 110px;
                     width: 100%;
                     border-radius: var(--radius-sm);
-                    margin-bottom: 8px;
-                    background: var(--bg-glass-light);
+                    margin-bottom: 10px;
+                    background: var(--bg-primary);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -66,49 +70,50 @@ const MenuItemCard = ({ item, inCart, onAdd }) => {
                 }
                 .item-code {
                     position: absolute;
-                    top: 4px;
-                    left: 4px;
-                    padding: 2px 4px;
-                    background: rgba(0,0,0,0.6);
+                    top: 6px;
+                    left: 6px;
+                    padding: 3px 6px;
+                    background: rgba(15, 23, 42, 0.8);
                     color: white;
-                    border-radius: 4px;
-                    font-size: 9px;
-                    font-weight: 800;
+                    border-radius: var(--radius-xs);
+                    font-size: 10px;
+                    font-weight: 700;
                     z-index: 10;
+                    letter-spacing: 0.5px;
                 }
                 .qty-badge {
                     position: absolute;
-                    top: -6px;
-                    right: -6px;
-                    width: 22px;
-                    height: 22px;
+                    top: -8px;
+                    right: -8px;
+                    width: 24px;
+                    height: 24px;
                     border-radius: 50%;
-                    background: var(--accent-primary);
+                    background: var(--gradient-primary);
                     color: white;
-                    font-size: 10px;
+                    font-size: 11px;
                     font-weight: 800;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     z-index: 20;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                    box-shadow: 0 4px 10px rgba(249, 115, 22, 0.4);
                 }
                 .item-name {
-                    font-size: var(--font-xs);
-                    font-weight: 600;
-                    line-height: 1.2;
+                    font-size: var(--font-sm);
+                    font-weight: 700;
+                    color: var(--text-primary);
+                    line-height: 1.3;
                     flex: 1;
                     display: -webkit-box;
                     -webkit-line-clamp: 2;
                     -webkit-box-orient: vertical;
                     overflow: hidden;
-                    margin-top: 2px;
                 }
                 .item-price {
                     font-weight: 800;
-                    font-size: var(--font-sm);
+                    font-size: var(--font-md);
                     color: var(--accent-primary);
-                    margin-top: auto;
+                    margin-top: 6px;
                 }
             `}</style>
         </div>

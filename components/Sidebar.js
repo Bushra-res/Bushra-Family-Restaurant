@@ -28,8 +28,6 @@ export default function Sidebar({ isOpen, onClose }) {
             links: [
                 { href: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
                 { href: '/admin/pos', label: 'POS Terminal', icon: '🖥️' },
-                { href: '/admin/orders', label: 'Orders', icon: '📦' },
-                { href: '/admin/kitchen', label: 'Kitchen Display', icon: '👨‍🍳' },
             ]
         },
         {
@@ -45,7 +43,6 @@ export default function Sidebar({ isOpen, onClose }) {
             title: 'Administration',
             links: [
                 { href: '/admin/customers', label: 'Customers', icon: '👥' },
-                { href: '/admin/staff', label: 'Staff', icon: '👨‍💼' },
                 { href: '/admin/coupons', label: 'Coupons', icon: '🎫' },
             ]
         },
@@ -72,15 +69,14 @@ export default function Sidebar({ isOpen, onClose }) {
             position: 'fixed',
             left: 0,
             top: 0,
-            background: 'var(--bg-glass)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            borderRight: '1px solid var(--border-light)',
+            background: '#ffffff',
+            borderRight: '1px solid var(--border)',
             display: 'flex',
             flexDirection: 'column',
             zIndex: 100,
             overflowY: 'auto',
             transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow: '2px 0 8px rgba(0, 0, 0, 0.04)',
         }}>
             <style jsx>{`
                 @media (max-width: 992px) {
@@ -146,20 +142,26 @@ export default function Sidebar({ isOpen, onClose }) {
                         {group.links.map(link => {
                             const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
                             return (
-                                <Link key={link.href} href={link.href} style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 'var(--space-sm)',
-                                    padding: '8px 14px',
-                                    borderRadius: 'var(--radius-sm)',
-                                    marginBottom: '2px',
-                                    fontSize: 'var(--font-sm)',
-                                    fontWeight: isActive ? 600 : 400,
-                                    color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                                    background: isActive ? 'rgba(249, 115, 22, 0.1)' : 'transparent',
-                                    transition: 'var(--transition-fast)',
-                                    textDecoration: 'none',
-                                }}>
+                                <Link 
+                                    key={link.href} 
+                                    href={link.href} 
+                                    onClick={() => {
+                                        if (typeof window !== 'undefined' && window.innerWidth <= 992 && onClose) onClose();
+                                    }}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 'var(--space-sm)',
+                                        padding: '8px 14px',
+                                        borderRadius: 'var(--radius-sm)',
+                                        marginBottom: '2px',
+                                        fontSize: 'var(--font-sm)',
+                                        fontWeight: isActive ? 600 : 400,
+                                        color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                                        background: isActive ? 'rgba(249, 115, 22, 0.1)' : 'transparent',
+                                        transition: 'var(--transition-fast)',
+                                        textDecoration: 'none',
+                                    }}>
                                     <span style={{ fontSize: '18px' }}>{link.icon}</span>
                                     {link.label}
                                 </Link>
@@ -198,8 +200,8 @@ export default function Sidebar({ isOpen, onClose }) {
                 <button onClick={() => {
                     localStorage.removeItem('offline_session');
                     signOut({ callbackUrl: '/login' });
-                }} className="btn btn-secondary" style={{ width: '100%' }}>
-                    🚪 Logout
+                }} className="btn btn-danger" style={{ width: '100%', borderRadius: 'var(--radius-full)', fontWeight: 700, gap: 'var(--space-sm)' }}>
+                    🛑 Logout
                 </button>
             </div>
         </aside>

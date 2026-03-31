@@ -9,6 +9,12 @@ export async function GET(req) {
         const search = searchParams.get('search') || '';
         const categoryId = searchParams.get('category') || '';
         
+        // Pagination params
+        const page = parseInt(searchParams.get('page')) || 1;
+        const limit = parseInt(searchParams.get('limit')) || 50;
+        const skip = (page - 1) * limit;
+        const isPaged = searchParams.has('page');
+        
         let salesCount = {};
         
         // Skip expensive aggregation for administrative lists unless requested
@@ -45,7 +51,17 @@ export async function GET(req) {
         }
         if (categoryId) query.category = categoryId;
 
-        const menuItems = await db.find('menuitems', query);
+        // Fetch using paged method if requested, otherwise standard find
+        let menuItems, totalCount;
+        if (isPaged) {
+            const result = await db.findPaged('menuitems', query, skip, limit);
+            menuItems = result.data;
+            totalCount = result.total;
+        } else {
+            menuItems = await db.find('menuitems', query);
+            totalCount = menuItems.length;
+        }
+
         const categories = await db.read('categories');
 
         // Manual population and adding salesCount
@@ -54,8 +70,6 @@ export async function GET(req) {
             // Only include salesCount if not in minimal mode
             salesCount: !minimal ? (salesCount[String(item._id)] || 0) : undefined,
             category: categories.find(c => String(c._id) === String(item.category)) || item.category,
-            // Optimization: If minimal, we could omit the full image here if it's too big
-            // image: minimal ? undefined : item.image 
         }));
 
         // Sort by salesCount if available, otherwise by name
@@ -63,6 +77,18 @@ export async function GET(req) {
             populatedMenu.sort((a, b) => b.salesCount - a.salesCount);
         } else {
             populatedMenu.sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        if (isPaged) {
+            return NextResponse.json({
+                items: populatedMenu,
+                pagination: {
+                    total: totalCount,
+                    page,
+                    limit,
+                    pages: Math.ceil(totalCount / limit)
+                }
+            });
         }
 
         return NextResponse.json(populatedMenu);

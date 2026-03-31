@@ -116,7 +116,7 @@ export default function AdminDashboard() {
                         <p style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Operating costs</p>
                     </div>
                 </div>
-                <div className="stat-card premium-hover" style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                <div className="stat-card premium-hover">
                     <div className="stat-icon" style={{ background: 'rgba(16,185,129,0.15)' }}>💎</div>
                     <div className="stat-info">
                         <h3>Net Revenue</h3>
@@ -166,20 +166,39 @@ export default function AdminDashboard() {
                 </div>
             </div>
 
-            {/* Revenue Trend Chart Visualization */}
+            {/* Weekly Sales Bar Chart */}
             {report?.revenueByDay && Object.keys(report.revenueByDay).length > 0 && (
                 <div className="card card-glass animate-slideUp" style={{ marginBottom: 'var(--space-xl)' }}>
-                    <h3 style={{ fontWeight: 700, marginBottom: 'var(--space-md)' }}>📈 Revenue Trends</h3>
-                    <div style={{ display: 'flex', gap: 'var(--space-sm)', overflowX: 'auto', paddingBottom: '10px', scrollbarWidth: 'thin' }}>
-                        {Object.entries(report.revenueByDay).slice(-15).map(([day, rev]) => (
-                            <div key={day} className="stat-card" style={{ 
-                                textAlign: 'center', minWidth: 110, flex: '1 1 110px', 
-                                background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-light)' 
-                            }}>
-                                <div style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}>{day}</div>
-                                <div style={{ fontWeight: 800, color: 'var(--accent-primary)', fontSize: 'var(--font-sm)' }}>{formatCurrency(rev)}</div>
-                            </div>
-                        ))}
+                    <h3 style={{ fontWeight: 700, marginBottom: 'var(--space-lg)' }}>📈 Weekly Sales Overview</h3>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: 200, padding: '0 var(--space-sm)' }}>
+                        {(() => {
+                            const entries = Object.entries(report.revenueByDay).slice(-7);
+                            const maxVal = Math.max(...entries.map(([,v]) => v), 1);
+                            return entries.map(([day, rev], idx) => {
+                                const pct = (rev / maxVal) * 100;
+                                const isToday = idx === entries.length - 1;
+                                return (
+                                    <div key={day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', height: '100%', justifyContent: 'flex-end' }}>
+                                        <span style={{ fontSize: '10px', fontWeight: 700, color: isToday ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>
+                                            {formatCurrency(rev)}
+                                        </span>
+                                        <div style={{
+                                            width: '100%',
+                                            maxWidth: 48,
+                                            height: `${Math.max(pct, 4)}%`,
+                                            background: isToday ? 'var(--gradient-primary)' : 'var(--accent-primary)',
+                                            opacity: isToday ? 1 : 0.25 + (pct / 100) * 0.6,
+                                            borderRadius: '8px 8px 4px 4px',
+                                            transition: 'height 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                                            minHeight: 6,
+                                        }} />
+                                        <span style={{ fontSize: '10px', fontWeight: 500, color: 'var(--text-muted)' }}>
+                                            {day.split('/').slice(0,2).join('/')}
+                                        </span>
+                                    </div>
+                                );
+                            });
+                        })()}
                     </div>
                 </div>
             )}
@@ -188,11 +207,11 @@ export default function AdminDashboard() {
                 {/* Fast Selling Product */}
                 <div className="card card-glass" style={{ 
                     position: 'relative', overflow: 'hidden', 
-                    border: '1px solid var(--accent-primary)',
-                    background: 'linear-gradient(145deg, rgba(249, 115, 22, 0.1), rgba(10, 14, 26, 0.8))'
+                    border: '1px solid rgba(249, 115, 22, 0.3)',
+                    background: 'linear-gradient(145deg, rgba(249, 115, 22, 0.08), var(--bg-card))'
                 }}>
                     <div style={{ 
-                        position: 'absolute', top: -10, right: -10, fontSize: 80, opacity: 0.1, transform: 'rotate(15deg)'
+                        position: 'absolute', top: -10, right: -10, fontSize: 80, opacity: 0.08, transform: 'rotate(15deg)'
                     }}>🔥</div>
                     <div style={{ position: 'relative', zIndex: 1 }}>
                         <span className="badge badge-warning" style={{ marginBottom: 'var(--space-sm)' }}>✨ Star of the Period</span>
@@ -232,9 +251,9 @@ export default function AdminDashboard() {
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
                                         <span style={{
                                             width: 28, height: 28, borderRadius: 'var(--radius-sm)',
-                                            background: i === 0 ? 'var(--gradient-primary)' : 'var(--bg-card)',
+                                            background: i === 0 ? 'var(--gradient-primary)' : 'var(--bg-input)',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontSize: 'var(--font-xs)', fontWeight: 800, color: 'white',
+                                            fontSize: 'var(--font-xs)', fontWeight: 800, color: i === 0 ? 'white' : 'var(--text-secondary)',
                                         }}>{i + 1}</span>
                                         <span style={{ fontWeight: 600, fontSize: 'var(--font-sm)' }}>{item.name}</span>
                                     </div>
@@ -264,7 +283,7 @@ export default function AdminDashboard() {
                                         <span style={{ textTransform: 'capitalize', fontWeight: 500 }}>{type.replace(/_/g, ' ')}</span>
                                         <span style={{ fontWeight: 700 }}>{count} ({pct}%)</span>
                                     </div>
-                                    <div style={{ height: 10, background: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-full)', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ height: 10, background: 'var(--bg-input)', borderRadius: 'var(--radius-full)', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
                                         <div style={{ 
                                             width: `${pct}%`, height: '100%', 
                                             background: colors[type] || 'var(--accent-primary)', 
@@ -285,8 +304,8 @@ export default function AdminDashboard() {
                         {(report?.orders || []).slice(0, 6).map(order => (
                             <div key={order._id} style={{ 
                                 display: 'flex', justifyContent: 'space-between', padding: '10px 14px', 
-                                background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)',
-                                border: '1px solid rgba(255,255,255,0.02)'
+                                background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)',
+                                border: '1px solid var(--border-light)'
                             }}>
                                 <div>
                                     <div style={{ fontSize: 'var(--font-sm)', fontWeight: 600 }}>#{order.orderId}</div>

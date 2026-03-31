@@ -20,19 +20,18 @@ export default function LoadingAnimation({ fullScreen = false }) {
     const content = (
         <div className="premium-loader">
             <div className="loader-container">
-                <div className="outer-ring"></div>
-                <div className="inner-ring"></div>
-                <div className="logo-box">
+                <svg className="progress-ring" width="120" height="120">
+                    <circle className="progress-ring__circle-bg" stroke="#e2e8f0" strokeWidth="3" fill="transparent" r="54" cx="60" cy="60" />
+                    <circle className="progress-ring__circle" stroke="var(--accent-primary)" strokeWidth="3" fill="transparent" r="54" cx="60" cy="60" />
+                </svg>
+                <div className="logo-wrapper">
                     <img src={logo} alt="Loading..." className="premium-logo" 
                         onError={(e) => { e.target.src = '/images/logo.png'; }} />
                 </div>
-                <div className="glow-effect"></div>
             </div>
-            <div className="text-container">
-                <h3 className="loading-title">BUSHRA</h3>
-                <div className="loading-bar">
-                    <div className="loading-progress"></div>
-                </div>
+            <div className="text-wrapper">
+                <h3 className="brand-text">BUSHRA</h3>
+                <p className="loading-status">Setting up your kitchen...</p>
             </div>
 
             <style jsx>{`
@@ -41,39 +40,28 @@ export default function LoadingAnimation({ fullScreen = false }) {
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
-                    padding: 40px;
                 }
                 .loader-container {
                     position: relative;
-                    width: 140px;
-                    height: 140px;
+                    width: 120px;
+                    height: 120px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     margin-bottom: 24px;
                 }
-                .outer-ring {
+                .progress-ring {
+                    transform: rotate(-90deg);
                     position: absolute;
-                    width: 100%;
-                    height: 100%;
-                    border: 3px solid transparent;
-                    border-top-color: var(--accent-primary);
-                    border-bottom-color: var(--accent-primary);
-                    border-radius: 50%;
-                    animation: rotate 2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+                    inset: 0;
                 }
-                .inner-ring {
-                    position: absolute;
-                    width: 80%;
-                    height: 80%;
-                    border: 3px solid transparent;
-                    border-left-color: var(--accent-secondary, #f97316);
-                    border-right-color: var(--accent-secondary, #f97316);
-                    border-radius: 50%;
-                    animation: rotate-reverse 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-                    opacity: 0.5;
+                .progress-ring__circle {
+                    stroke-dasharray: 339.292;
+                    stroke-dashoffset: 339.292;
+                    animation: progress-draw 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+                    stroke-linecap: round;
                 }
-                .logo-box {
+                .logo-wrapper {
                     width: 80px;
                     height: 80px;
                     background: white;
@@ -82,77 +70,50 @@ export default function LoadingAnimation({ fullScreen = false }) {
                     align-items: center;
                     justify-content: center;
                     z-index: 10;
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-                    animation: pulse 2s ease-in-out infinite;
-                    padding: 10px;
+                    box-shadow: var(--shadow-md);
+                    animation: logo-pulse 2s ease-in-out infinite;
+                    padding: 12px;
                     overflow: hidden;
+                    border: 1px solid var(--border-light);
                 }
                 .premium-logo {
                     width: 100%;
                     height: 100%;
                     object-fit: contain;
                 }
-                .glow-effect {
-                    position: absolute;
-                    width: 100px;
-                    height: 100px;
-                    background: var(--accent-primary);
-                    border-radius: 50%;
-                    filter: blur(40px);
-                    opacity: 0.2;
-                    z-index: 1;
-                    animation: glow-pulse 3s infinite;
-                }
-                .text-container {
+                .text-wrapper {
                     text-align: center;
+                    animation: fade-in-up 0.8s ease-out;
                 }
-                .loading-title {
+                .brand-text {
                     margin: 0;
-                    font-size: 20px;
+                    font-size: 24px;
                     font-weight: 900;
-                    letter-spacing: 4px;
+                    letter-spacing: 6px;
                     color: var(--text-primary);
-                    background: linear-gradient(135deg, var(--text-primary), var(--accent-primary));
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    margin-bottom: 12px;
+                    margin-bottom: 4px;
                 }
-                .loading-bar {
-                    width: 120px;
-                    height: 4px;
-                    background: var(--border-light);
-                    border-radius: 10px;
-                    overflow: hidden;
-                    margin: 0 auto;
-                }
-                .loading-progress {
-                    width: 30%;
-                    height: 100%;
-                    background: var(--accent-primary);
-                    border-radius: 10px;
-                    animation: progress-slide 1.5s ease-in-out infinite;
+                .loading-status {
+                    font-size: 11px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    color: var(--text-muted);
+                    margin: 0;
                 }
 
-                @keyframes rotate {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
+                @keyframes progress-draw {
+                    0% { stroke-dashoffset: 339.292; }
+                    50% { stroke-dashoffset: 0; }
+                    100% { stroke-dashoffset: -339.292; }
                 }
-                @keyframes rotate-reverse {
-                    from { transform: rotate(360deg); }
-                    to { transform: rotate(0deg); }
+                @keyframes logo-pulse {
+                    0%, 100% { transform: scale(1); box-shadow: var(--shadow-md); }
+                    50% { transform: scale(1.05); box-shadow: var(--shadow-lg); }
                 }
-                @keyframes pulse {
-                    0%, 100% { transform: scale(1); }
-                    50% { transform: scale(1.05); }
-                }
-                @keyframes glow-pulse {
-                    0%, 100% { opacity: 0.1; transform: scale(0.8); }
-                    50% { opacity: 0.3; transform: scale(1.2); }
-                }
-                @keyframes progress-slide {
-                    0% { transform: translateX(-100%); width: 20%; }
-                    50% { width: 50%; }
-                    100% { transform: translateX(400%); width: 20%; }
+                @keyframes fade-in-up {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
             `}</style>
         </div>
@@ -173,8 +134,12 @@ export default function LoadingAnimation({ fullScreen = false }) {
 
     return (
         <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            minHeight: '400px', width: '100%'
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            minHeight: '70vh', 
+            width: '100%',
+            flex: 1
         }}>
             {content}
         </div>

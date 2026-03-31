@@ -53,14 +53,20 @@ export async function POST(req) {
             specialInstructions: i.specialInstructions || ''
         }));
 
+        const { customerName, customerPhone } = data;
+        const isWalkin = customerName === 'Walk-in Customer';
+        if (!isWalkin && (!customerName || !customerPhone || customerPhone.length < 10)) {
+            return NextResponse.json({ error: 'Customer Name and 10-digit Mobile Number are required' }, { status: 400 });
+        }
+
         const orderData = {
             ...data,
             items: normalizedItems,
             orderType,
             paymentStatus,
             orderId, // Sequential Bill Number
-            customerName: data.customerName || 'Walk-in Customer',
-            customerPhone: data.customerPhone || '',
+            customerName,
+            customerPhone,
             orderNotes: data.orderNotes || data.notes || '',
             status: data.status || 'pending',
             createdAt: new Date().toISOString()

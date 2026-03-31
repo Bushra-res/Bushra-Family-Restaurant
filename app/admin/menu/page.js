@@ -16,6 +16,8 @@ export default function MenuManagement() {
     const [settings, setSettings] = useState(null);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
     const [itemsPerPage] = useState(50);
     const { addToast } = useToast();
     const { confirm } = useConfirm();
@@ -24,17 +26,32 @@ export default function MenuManagement() {
     const [form, setForm] = useState(emptyItem);
     const [catForm, setCatForm] = useState({ name: '', description: '' });
 
-    const fetchData = async () => {
-        setLoading(true);
-        const [cats, menuItems, settingsRes] = await Promise.all([
-            fetch('/api/categories').then(r => r.json()),
-            fetch(`/api/menu?minimal=true&search=${encodeURIComponent(search)}`).then(r => r.json()),
-            fetch('/api/settings').then(r => r.json()),
-        ]);
-        setCategories(cats || []);
-        setItems(menuItems || []);
-        setSettings(settingsRes || {});
-        setLoading(false);
+    const fetchData = async (isSilent = false) => {
+        if (!isSilent) setLoading(true);
+        try {
+            const [cats, menuRes, settingsRes] = await Promise.all([
+                fetch('/api/categories').then(r => r.json()),
+                fetch(`/api/menu?minimal=true&search=${encodeURIComponent(search)}&page=${page}&limit=${itemsPerPage}`).then(r => r.json()),
+                fetch('/api/settings').then(r => r.json()),
+            ]);
+            setCategories(cats || []);
+            
+            if (menuRes.items) {
+                setItems(menuRes.items || []);
+                setTotalPages(menuRes.pagination.pages || 1);
+                setTotalItems(menuRes.pagination.total || 0);
+            } else {
+                // Fallback for non-paged response
+                setItems(menuRes || []);
+                setTotalItems(menuRes.length || 0);
+            }
+            
+            setSettings(settingsRes || {});
+        } catch (err) {
+            addToast('Failed to fetch data', 'error');
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => { 
@@ -42,7 +59,7 @@ export default function MenuManagement() {
             fetchData();
         }, 300);
         return () => clearTimeout(delayDebounceFn);
-    }, [search]);
+    }, [search, page]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -189,7 +206,7 @@ export default function MenuManagement() {
             <div className="page-header">
                 <div>
                     <h1>Menu Management</h1>
-                    <p className="subtitle">{items.length} items across {categories.length} categories</p>
+                    <p className="subtitle">{totalItems} items across {categories.length} categories</p>
                 </div>
                 <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
                     <button onClick={() => setShowCatModal(true)} className="btn btn-secondary">+ Category</button>
@@ -200,27 +217,40 @@ export default function MenuManagement() {
             </div>
 
             {/* Categories */}
-            <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-lg)', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-lg)', flexWrap: 'wrap' }}>
                 {categories.map(cat => (
-                    <div key={cat._id} className="badge badge-info" style={{ padding: '6px 12px', cursor: 'pointer', fontSize: 'var(--font-sm)' }}
+                    <div key={cat._id} className="badge" 
+                        style={{ 
+                            padding: '10px 14px', cursor: 'pointer', fontSize: 'var(--font-xs)',
+                            border: '1px solid var(--border)', background: '#ffffff', color: 'var(--text-secondary)',
+                            fontWeight: 700, borderRadius: 'var(--radius-md)', transition: 'var(--transition-fast)',
+                            display: 'flex', alignItems: 'center', gap: '6px', boxShadow: 'var(--shadow-sm)'
+                        }}
+                        onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.color = 'var(--accent-primary)'; }}
+                        onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                         onClick={() => { setCatForm({ _id: cat._id, name: cat.name, description: cat.description }); setShowCatModal(true); }}>
-                        {cat.name}
+                        <span style={{ fontSize: '14px' }}>📂</span> {cat.name}
                     </div>
                 ))}
             </div>
 
-            {/* Search and Filters */}
-            <div className="card" style={{ marginBottom: 'var(--space-md)', padding: 'var(--space-sm)' }}>
-                <div style={{ display: 'flex', gap: 'var(--space-md)', alignItems: 'center' }}>
-                    <div style={{ flex: 1, position: 'relative' }}>
-                        <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
-                        <input 
-                            value={search} 
-                            onChange={e => setSearch(e.target.value)} 
-                            placeholder="Search by name or 3-digit code..." 
-                            style={{ paddingLeft: 40, width: '100%' }}
-                        />
-                    </div>
+            {/* Centered Search Bar */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-lg)' }}>
+                <div style={{ position: 'relative', maxWidth: '500px', width: '100%', group: 'search' }}>
+                    <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5, fontSize: '18px' }}>🔍</span>
+                    <input 
+                        value={search} 
+                        onChange={e => setSearch(e.target.value)} 
+                        placeholder="Search by name or 3-digit code..." 
+                        style={{ 
+                            paddingLeft: '48px', 
+                            borderRadius: 'var(--radius-full)', 
+                            border: '1.5px solid var(--accent-primary)',
+                            background: '#ffffff',
+                            fontWeight: 600,
+                            boxShadow: '0 4px 15px rgba(249, 115, 22, 0.08)'
+                        }}
+                    />
                 </div>
             </div>
 
@@ -312,6 +342,37 @@ export default function MenuManagement() {
                         </tbody>
                     </table>
                 </div>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        gap: 'var(--space-md)',
+                        padding: '16px',
+                        borderTop: '1px solid var(--border)',
+                        background: 'var(--bg-secondary)'
+                    }}>
+                        <button 
+                            disabled={page === 1} 
+                            onClick={() => setPage(p => p - 1)}
+                            className="btn btn-ghost btn-sm"
+                        >
+                            Previous
+                        </button>
+                        <div style={{ fontSize: 'var(--font-sm)', fontWeight: 600 }}>
+                            Page {page} of {totalPages}
+                        </div>
+                        <button 
+                            disabled={page === totalPages} 
+                            onClick={() => setPage(p => p + 1)}
+                            className="btn btn-ghost btn-sm"
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Item Modal */}

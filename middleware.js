@@ -12,7 +12,7 @@ export async function middleware(request) {
     if (isPublic) return NextResponse.next();
 
     // API routes that need auth but not role check
-    if (pathname.startsWith('/api/') && !pathname.startsWith('/api/admin/') && !pathname.startsWith('/api/staff/')) {
+    if (pathname.startsWith('/api/') && !pathname.startsWith('/api/admin/')) {
         // Allow unauthenticated POST to orders (for guest checkout)
         if (pathname === '/api/orders' && request.method === 'POST') {
             return NextResponse.next();
@@ -25,7 +25,7 @@ export async function middleware(request) {
     }
 
     // Admin routes
-    if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin') || pathname.startsWith('/api/staff')) {
+    if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
         if (!token || token.role !== 'admin') {
             if (pathname.startsWith('/api/')) {
                 return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

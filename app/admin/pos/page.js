@@ -80,7 +80,8 @@ export default function AdminPOS() {
     const [selectedTable, setSelectedTable] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('cash');
     const [discount, setDiscount] = useState(0);
-    const [customerName, setCustomerName] = useState('Walk-in Customer');
+    const [customerMode, setCustomerMode] = useState('walkin'); // 'walkin' or 'custom'
+    const [customerName, setCustomerName] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
     const [deliveryAddress, setDeliveryAddress] = useState({ street: '', city: '', pincode: '' });
     const [notes, setNotes] = useState('');
@@ -210,9 +211,15 @@ export default function AdminPOS() {
     const placeOrder = async (overrideMethod = null) => {
         if (cart.length === 0) { addToast('Add items first', 'warning'); return; }
         
+        if (customerMode === 'custom' && (!customerName || customerName.trim() === '' || !customerPhone || customerPhone.length < 10)) {
+            addToast('Customer Name and 10-digit Mobile Number are required', 'error');
+            return;
+        }
+        
         const method = overrideMethod || paymentMethod;
         const orderData = {
-            customerName, customerPhone,
+            customerName: customerMode === 'walkin' ? 'Walk-in Customer' : customerName,
+            customerPhone: customerMode === 'walkin' ? '' : customerPhone,
             deliveryAddress: orderType === 'delivery' ? deliveryAddress : undefined,
             items: cart.map(i => ({ menuItem: i._id, name: i.name, price: i.price, quantity: i.quantity, specialInstructions: i.specialInstructions })),
             subtotal, tax, discount, total,
@@ -236,7 +243,8 @@ export default function AdminPOS() {
             setModalState('success');
             setCart([]);
             setDiscount(0);
-            setCustomerName('Walk-in Customer');
+            setCustomerMode('walkin');
+            setCustomerName('');
             setCustomerPhone('');
             setDeliveryAddress({ street: '', city: '', pincode: '' });
             setNotes('');
@@ -271,7 +279,8 @@ export default function AdminPOS() {
                 setModalState('success');
                 setCart([]);
                 setDiscount(0);
-                setCustomerName('Walk-in Customer');
+                setCustomerMode('walkin');
+                setCustomerName('');
                 setCustomerPhone('');
                 setDeliveryAddress({ street: '', city: '', pincode: '' });
                 setNotes('');
@@ -496,81 +505,89 @@ export default function AdminPOS() {
                     display: none;
                 }
                 .tab {
-                    padding: 8px 16px;
-                    border-radius: var(--radius-sm);
-                    background: var(--bg-card);
+                    padding: 10px 18px;
+                    border-radius: var(--radius-full);
+                    background: #ffffff;
                     border: 1px solid var(--border);
                     color: var(--text-secondary);
                     font-size: var(--font-xs);
-                    font-weight: 600;
+                    font-weight: 700;
                     white-space: nowrap;
                     cursor: pointer;
                     transition: var(--transition-fast);
+                    box-shadow: var(--shadow-sm);
                 }
                 .tab:hover {
                     border-color: var(--accent-primary);
                     color: var(--accent-primary);
+                    transform: translateY(-1px);
+                    box-shadow: var(--shadow-md);
                 }
                 .tab.active {
                     background: var(--gradient-primary);
                     border-color: transparent;
                     color: white;
-                    box-shadow: 0 4px 12px rgba(249,115,22,0.2);
+                    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
                 }
             `}</style>
             {/* Left: Menu Grid */}
-            <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 'var(--space-sm)' }}>
+                <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)', alignItems: 'center', background: 'white', padding: '12px 20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
                         <h2 style={{
-                            fontSize: 'var(--font-xl)', fontWeight: 800,
-                            background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                            margin: 0
-                        }}>🍽️ BUSHRA POS</h2>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'var(--space-xs)' }}>
+                            fontSize: 'var(--font-xl)', fontWeight: 900,
+                            color: 'var(--text-primary)',
+                            margin: 0,
+                            letterSpacing: '-0.5px'
+                        }}>BUSHRA <span style={{ color: 'var(--accent-primary)' }}>POS</span></h2>
+                        <Link 
+                            key={link.href} 
+                            href={link.href} 
+                            className={`nav-link ${pathname === link.href ? 'active' : ''}`}
+                            onClick={() => {
+                                if (window.innerWidth <= 992 && onClose) onClose();
+                            }}
+                        >
+                            <span style={{ fontSize: 18 }}>{link.icon}</span>
+                            <span>{link.label}</span>
+                        </Link>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'var(--space-xs)', padding: '4px 10px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-full)' }}>
                             <div style={{ 
                                 width: 8, height: 8, borderRadius: '50%', 
                                 background: isOnline ? '#22c55e' : '#ef4444',
                                 boxShadow: isOnline ? '0 0 10px rgba(34,197,94,0.4)' : '0 0 10px rgba(239,68,68,0.4)'
                             }}></div>
-                            <span style={{ fontSize: 'var(--font-xs)', fontWeight: 700, color: isOnline ? 'var(--text-secondary)' : '#ef4444' }}>
+                            <span style={{ fontSize: '10px', fontWeight: 800, color: isOnline ? '#15803d' : '#b91c1c' }}>
                                 {isOnline ? 'ONLINE' : 'OFFLINE'}
                             </span>
-                            {pendingSync > 0 && (
-                                <span className="badge badge-warning" style={{ fontSize: '9px', padding: '2px 6px' }}>
-                                    {pendingSync} PENDING SYNC
-                                </span>
-                            )}
                         </div>
                     </div>
-                    <div style={{ display: 'flex', gap: 'var(--space-xs)' }}>
-                        <input type="text" placeholder="No. (001)" value={itemCode}
-                            onChange={e => {
-                                const val = e.target.value.replace(/\D/g, '').slice(0, 3);
-                                setItemCode(val);
-                                if (val.length === 3) {
-                                    findAndAddByCode(val);
-                                }
-                            }}
-                            title="Search by Number (e.g. 001)"
-                            style={{ 
-                                maxWidth: 80, 
-                                padding: '8px 12px', 
-                                fontSize: 'var(--font-xs)', 
-                                border: '2px solid var(--accent-primary)', 
-                                borderRadius: 'var(--radius-sm)',
-                                textAlign: 'center',
-                                fontWeight: 800
-                            }} />
-                        <input type="search" placeholder="Search items..." value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            style={{ maxWidth: 150, padding: '8px 12px', fontSize: 'var(--font-xs)' }} />
+                    <div style={{ display: 'flex', gap: 'var(--space-sm)', flex: 1, justifyContent: 'flex-end' }}>
+                        <div style={{ position: 'relative', maxWidth: 100 }}>
+                            <input type="text" placeholder="CODE" value={itemCode}
+                                onChange={e => {
+                                    const val = e.target.value.replace(/\D/g, '').slice(0, 3);
+                                    setItemCode(val);
+                                    if (val.length === 3) findAndAddByCode(val);
+                                }}
+                                style={{ 
+                                    width: '100%', padding: '10px', fontSize: 'var(--font-xs)', 
+                                    border: '2px solid var(--accent-primary)', borderRadius: 'var(--radius-sm)',
+                                    textAlign: 'center', fontWeight: 800, background: 'var(--accent-glow)'
+                                }} />
+                        </div>
+                        <div style={{ position: 'relative', flex: 1, maxWidth: 250 }}>
+                            <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14 }}>🔍</span>
+                            <input type="search" placeholder="Search menu..." value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                style={{ width: '100%', padding: '10px 10px 10px 36px', fontSize: 'var(--font-sm)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--bg-primary)' }} />
+                        </div>
                     </div>
                 </div>
 
-                <div className="tabs" style={{ marginBottom: 'var(--space-sm)' }}>
+                <div className="tabs" style={{ marginBottom: 'var(--space-md)', paddingBottom: 'var(--space-xs)' }}>
                     <button className={`tab ${selectedCategory === 'all' ? 'active' : ''}`}
-                        onClick={() => setSelectedCategory('all')}>All</button>
+                        onClick={() => setSelectedCategory('all')}>🏷️ All Items</button>
                     {categories.map(c => (
                         <button key={c._id} className={`tab ${selectedCategory === c._id ? 'active' : ''}`}
                             onClick={() => setSelectedCategory(c._id)}>{c.name}</button>
@@ -621,11 +638,32 @@ export default function AdminPOS() {
                             </button>
                         ))}
                     </div>
+                    {/* Customer Mode Toggle */}
+                    <div style={{ display: 'flex', gap: '4px', marginBottom: 'var(--space-sm)', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', padding: '3px' }}>
+                        <button type="button" onClick={() => { setCustomerMode('walkin'); setCustomerName(''); setCustomerPhone(''); }}
+                            className={`btn btn-sm ${customerMode === 'walkin' ? 'btn-primary' : ''}`}
+                            style={{ flex: 1, fontSize: '10px', padding: '5px 8px', background: customerMode === 'walkin' ? '' : 'transparent', border: 'none' }}>
+                            👤 Walk-in
+                        </button>
+                        <button type="button" onClick={() => setCustomerMode('custom')}
+                            className={`btn btn-sm ${customerMode === 'custom' ? 'btn-primary' : ''}`}
+                            style={{ flex: 1, fontSize: '10px', padding: '5px 8px', background: customerMode === 'custom' ? '' : 'transparent', border: 'none' }}>
+                            📝 Enter Customer
+                        </button>
+                    </div>
                     <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
-                        <input placeholder="Customer name" value={customerName} onChange={e => setCustomerName(e.target.value)}
-                            style={{ flex: 1, minWidth: '120px', padding: '6px 10px', fontSize: 'var(--font-xs)' }} />
-                        <input placeholder="Phone number" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)}
-                            style={{ flex: 1, minWidth: '120px', padding: '6px 10px', fontSize: 'var(--font-xs)' }} />
+                        {customerMode === 'custom' && (
+                            <>
+                                <div style={{ flex: 1, minWidth: '120px' }}>
+                                    <input placeholder="Customer name *" value={customerName} onChange={e => setCustomerName(e.target.value)}
+                                        style={{ width: '100%', padding: '6px 10px', fontSize: 'var(--font-xs)', border: !customerName ? '1px solid var(--danger)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} />
+                                </div>
+                                <div style={{ flex: 1, minWidth: '120px' }}>
+                                    <input placeholder="Mobile number *" value={customerPhone} onChange={e => setCustomerPhone(e.target.value.replace(/\D/g, '').slice(0,10))}
+                                        style={{ width: '100%', padding: '6px 10px', fontSize: 'var(--font-xs)', border: customerPhone.length < 10 ? '1px solid var(--danger)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} />
+                                </div>
+                            </>
+                        )}
                         {orderType === 'dine_in' && (
                             <select value={selectedTable} onChange={e => setSelectedTable(e.target.value)}
                                 style={{ width: 100, padding: '6px', fontSize: 'var(--font-xs)' }}>
@@ -650,9 +688,9 @@ export default function AdminPOS() {
                     <div style={{ 
                         marginTop: 'var(--space-sm)', 
                         padding: '10px', 
-                        background: 'rgba(255,255,255,0.03)', 
+                        background: 'var(--bg-primary)', 
                         borderRadius: 'var(--radius-sm)',
-                        border: '1px solid var(--border-light)'
+                        border: '1px solid var(--border)'
                     }}>
                         <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontSize: 'var(--font-xs)', fontWeight: 600 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -800,41 +838,32 @@ export default function AdminPOS() {
                                 </button>
                             ))}
                         </div>
-                        <button onClick={() => placeOrder()} className="btn btn-ghost" style={{ width: '100%', border: '1px solid var(--border)' }}>
-                            Manual Confirm
-                        </button>
                     </div>
                 ) : (
                     <div>
                         {lastOrder && (
-                            <div>
-                                <div style={{ textAlign: 'center', marginBottom: 'var(--space-lg)' }}>
-                                    <div style={{ fontSize: 48, marginBottom: 'var(--space-sm)' }}>🎉</div>
-                                    <h3>Order #{lastOrder.orderId}</h3>
-                                    <div style={{ fontSize: 'var(--font-2xl)', fontWeight: 800, color: 'var(--accent-primary)', marginTop: 'var(--space-sm)' }}>
-                                        ₹{lastOrder.total?.toFixed(2)}
-                                    </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: 48, marginBottom: 'var(--space-sm)' }}>🎉</div>
+                                <h3>Order #{lastOrder.orderId}</h3>
+                                <div style={{ fontSize: 'var(--font-2xl)', fontWeight: 800, color: 'var(--accent-primary)', margin: 'var(--space-sm) 0' }}>
+                                    ₹{lastOrder.total?.toFixed(2)}
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)', marginTop: 'var(--space-lg)' }}>
                                     {printCountdown > 0 && (
                                         <div style={{ 
-                                            padding: '8px', 
-                                            background: 'rgba(249, 115, 22, 0.1)', 
+                                            padding: '12px', 
+                                            background: 'var(--accent-glow)', 
                                             borderRadius: 'var(--radius-sm)', 
-                                            fontSize: 'var(--font-xs)',
-                                            textAlign: 'center',
+                                            border: '1px solid var(--accent-primary)',
                                             color: 'var(--accent-primary)',
-                                            fontWeight: 700,
-                                            border: '1px solid rgba(249, 115, 22, 0.2)'
+                                            fontWeight: 700
                                         }}>
-                                            ⚡ Auto-printing in {printCountdown}s...
+                                            🖨️ Printing in {printCountdown}s...
                                         </div>
                                     )}
                                     <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                                        <button onClick={printReceipt} className="btn btn-primary" style={{ flex: 1, height: '50px', fontSize: '16px' }}>🖨️ Print Bill</button>
-                                        <button onClick={sendWhatsAppBill} className="btn btn-secondary" style={{ flex: 1, height: '50px', fontSize: '16px', background: '#25D366', color: 'white', border: 'none' }}>
-                                            <span style={{ marginRight: '8px' }}>💬</span> WhatsApp
-                                        </button>
+                                        <button onClick={printReceipt} className="btn btn-primary" style={{ flex: 1 }}>🖨️ Bill</button>
+                                        <button onClick={sendWhatsAppBill} className="btn btn-secondary" style={{ flex: 1, background: '#25D366', color: 'white', border: 'none' }}>💬 WA</button>
                                     </div>
                                     <button onClick={() => setModalState('none')} className="btn btn-ghost" style={{ width: '100%', marginTop: 'var(--space-sm)' }}>New Order</button>
                                 </div>
