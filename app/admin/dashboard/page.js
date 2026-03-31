@@ -73,24 +73,31 @@ export default function AdminDashboard() {
 
     return (
         <div className="animate-fadeIn">
-            <div className="page-header" style={{ alignItems: 'flex-start' }}>
+            <div className="page-header" style={{ alignItems: 'center' }}>
                 <div>
                     <h1>Dashboard Overview</h1>
                     <p className="subtitle">Operational analytics & unified reporting for BUSHRA</p>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 'var(--space-sm)' }}>
-                    <div style={{ display: 'flex', gap: 'var(--space-xs)' }}>
+                <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'flex-end', 
+                    gap: 'var(--space-sm)',
+                    width: '100%',
+                    maxWidth: typeof window !== 'undefined' && window.innerWidth <= 768 ? '100%' : 'auto'
+                }}>
+                    <div style={{ display: 'flex', gap: 'var(--space-xs)', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%' }}>
                         {['daily', 'weekly', 'monthly', 'yearly'].map(p => (
                             <button key={p} className={`btn ${period === p ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-                                onClick={() => setPeriod(p)} style={{ textTransform: 'capitalize' }}>{p}</button>
+                                onClick={() => setPeriod(p)} style={{ textTransform: 'capitalize', flex: '1 0 auto' }}>{p}</button>
                         ))}
-                        <button onClick={downloadCSV} className="btn btn-success btn-sm">📥 Export CSV</button>
+                        <button onClick={downloadCSV} className="btn btn-success btn-sm" style={{ flex: '1 0 auto' }}>📥 Export CSV</button>
                     </div>
                     <button 
                         className="btn btn-secondary btn-sm" 
                         onClick={handleCleanup}
                         disabled={cleaning}
-                        style={{ color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '10px' }}
+                        style={{ color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '10px', width: '100%' }}
                     >
                         {cleaning ? '⌛ Cleaning...' : '🧹 Cleanup Sales & Expenses'}
                     </button>

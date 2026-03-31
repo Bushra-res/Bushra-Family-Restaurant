@@ -53,13 +53,13 @@ export default function AdminLayout({ children }) {
                 position: 'fixed',
                 top: 0, left: 0, right: 0,
                 height: 70,
-                background: '#ffffff',
-                borderBottom: '1px solid var(--border)',
+                background: '#1e293b', /* Matching Sidebar Dark Theme */
+                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
                 zIndex: 110,
                 padding: '0 var(--space-md)',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                boxShadow: 'var(--shadow-md)'
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
             }}>
                 <button 
                     onClick={() => setIsSidebarOpen(true)}
@@ -82,12 +82,11 @@ export default function AdminLayout({ children }) {
                 <div style={{ 
                     fontWeight: 900, 
                     fontSize: 'var(--font-md)', 
-                    background: 'var(--gradient-primary)', 
-                    WebkitBackgroundClip: 'text', 
-                    WebkitTextFillColor: 'transparent',
-                    letterSpacing: '1px'
+                    color: 'white',
+                    letterSpacing: '1.5px',
+                    textTransform: 'uppercase'
                 }}>
-                    BUSHRA ADMIN
+                    BUSHRA <span style={{ color: 'var(--accent-primary)' }}>ADMIN</span>
                 </div>
                 <div style={{ width: 44 }} />
             </header>

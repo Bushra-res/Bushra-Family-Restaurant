@@ -244,7 +244,14 @@ export default function SettingsPage() {
 
                             {/* GST Enable Toggle */}
                             <div style={{ ...toggleStyle(settings.gstEnabled), marginBottom: 'var(--space-md)' }}
-                                onClick={() => setSettings({ ...settings, gstEnabled: !settings.gstEnabled })}>
+                                onClick={() => {
+                                    const nextGstEnabled = !settings.gstEnabled;
+                                    setSettings({ 
+                                        ...settings, 
+                                        gstEnabled: nextGstEnabled,
+                                        taxPercentage: nextGstEnabled ? (settings.cgstRate + settings.sgstRate) : settings.taxPercentage
+                                    });
+                                }}>
                                 <div>
                                     <div style={{ fontWeight: 600, fontSize: 'var(--font-sm)' }}>GST Enabled</div>
                                     <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>

@@ -475,11 +475,19 @@ export default function AdminPOS() {
                         overflow-y: auto;
                         height: auto;
                         min-height: 100vh;
-                        padding-bottom: 200px; /* Space for sticky cart summary */
+                        padding-bottom: 20px;
+                        gap: var(--space-lg);
                     }
                     .cart-column {
                         width: 100% !important;
                         height: auto !important;
+                        max-height: none !important;
+                    }
+                }
+                
+                @media (max-width: 768px) {
+                    .pos-layout {
+                        padding-top: 10px;
                     }
                 }
                 .tabs {

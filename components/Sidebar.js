@@ -69,14 +69,14 @@ export default function Sidebar({ isOpen, onClose }) {
             position: 'fixed',
             left: 0,
             top: 0,
-            background: '#ffffff',
-            borderRight: '1px solid var(--border)',
+            background: '#1e293b', /* Slate-800: Premium Dark UI */
+            borderRight: '1px solid rgba(255, 255, 255, 0.05)',
             display: 'flex',
             flexDirection: 'column',
-            zIndex: 100,
+            zOrder: 100,
             overflowY: 'auto',
-            transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            boxShadow: '2px 0 8px rgba(0, 0, 0, 0.04)',
+            transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+            boxShadow: '4px 0 24px rgba(0, 0, 0, 0.2)',
         }}>
             <style jsx>{`
                 @media (max-width: 992px) {
@@ -88,18 +88,19 @@ export default function Sidebar({ isOpen, onClose }) {
                 .nav-group-title {
                     font-size: 10px;
                     text-transform: uppercase;
-                    letter-spacing: 1px;
-                    color: var(--text-muted);
-                    margin: var(--space-md) 0 var(--space-xs) var(--space-sm);
-                    font-weight: 700;
+                    letter-spacing: 1.5px;
+                    color: rgba(255, 255, 255, 0.4);
+                    margin: var(--space-lg) 0 var(--space-xs) var(--space-sm);
+                    font-weight: 800;
                 }
             `}</style>
             <div style={{
-                padding: 'var(--space-lg)',
-                borderBottom: '1px solid var(--border)',
+                padding: 'var(--space-xl) var(--space-lg)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                background: 'rgba(0, 0, 0, 0.2)'
             }}>
                 <Link href="/" onClick={() => { if (window.innerWidth <= 992 && onClose) onClose(); }} style={{ textDecoration: 'none' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
@@ -126,16 +127,18 @@ export default function Sidebar({ isOpen, onClose }) {
                         <div>
                             <div style={{
                                 fontSize: 'var(--font-lg)',
-                                fontWeight: 800,
-                                background: 'var(--gradient-primary)',
+                                fontWeight: 900,
+                                background: 'white',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
-                                lineHeight: 1
-                            }}>BUSHRA<br /><span style={{ fontSize: 'var(--font-xs)' }}>Family Restaurant</span></div>
+                                color: 'white',
+                                lineHeight: 1,
+                                letterSpacing: '0.5px'
+                            }}>BUSHRA<br /><span style={{ fontSize: 'var(--font-xs)', color: 'rgba(255,255,255,0.6)', WebkitTextFillColor: 'rgba(255,255,255,0.6)' }}>Family Restaurant</span></div>
                         </div>
                     </div>
                 </Link>
-                <button onClick={onClose} className="mobile-only btn btn-icon" style={{ display: 'none', background: 'var(--bg-primary)', border: '1px solid var(--border)' }}>✕</button>
+                <button onClick={onClose} className="mobile-only btn btn-icon" style={{ display: 'none', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}>✕</button>
             </div>
 
             <style jsx>{`
@@ -144,7 +147,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 }
             `}</style>
 
-            <nav style={{ padding: 'var(--space-sm) var(--space-md)', flex: 1 }}>
+            <nav style={{ padding: 'var(--space-md) var(--space-md)', flex: 1 }}>
                 {activeGroups.map((group, gIdx) => (
                     <div key={gIdx} style={{ marginBottom: 'var(--space-md)' }}>
                         <div className="nav-group-title">{group.title}</div>
@@ -161,17 +164,18 @@ export default function Sidebar({ isOpen, onClose }) {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: 'var(--space-sm)',
-                                        padding: '8px 14px',
+                                        padding: '12px 16px',
                                         borderRadius: 'var(--radius-sm)',
-                                        marginBottom: '2px',
+                                        marginBottom: '6px',
                                         fontSize: 'var(--font-sm)',
-                                        fontWeight: isActive ? 600 : 400,
-                                        color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                                        background: isActive ? 'rgba(249, 115, 22, 0.1)' : 'transparent',
-                                        transition: 'var(--transition-fast)',
+                                        fontWeight: isActive ? 700 : 500,
+                                        color: isActive ? 'white' : 'rgba(255, 255, 255, 0.7)',
+                                        background: isActive ? 'var(--gradient-primary)' : 'transparent',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                         textDecoration: 'none',
+                                        boxShadow: isActive ? '0 4px 12px rgba(249, 115, 22, 0.3)' : 'none',
                                     }}>
-                                    <span style={{ fontSize: '18px' }}>{link.icon}</span>
+                                    <span style={{ fontSize: '20px', filter: isActive ? 'none' : 'grayscale(1) opacity(0.7)' }}>{link.icon}</span>
                                     {link.label}
                                 </Link>
                             );
@@ -181,35 +185,47 @@ export default function Sidebar({ isOpen, onClose }) {
             </nav>
 
             <div style={{
-                padding: 'var(--space-md)',
-                borderTop: '1px solid var(--border)',
+                padding: 'var(--space-lg)',
+                borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                background: 'rgba(0, 0, 0, 0.2)'
             }}>
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 'var(--space-sm)',
-                    marginBottom: 'var(--space-md)',
-                    padding: '8px',
+                    gap: 'var(--space-md)',
+                    marginBottom: 'var(--space-lg)',
+                    padding: '12px',
+                    borderRadius: 'var(--radius-md)',
+                    background: 'rgba(255, 255, 255, 0.03)',
                 }}>
                     <div style={{
-                        width: 36, height: 36,
+                        width: 40, height: 40,
                         borderRadius: 'var(--radius-full)',
                         background: 'var(--gradient-primary)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontWeight: 700, fontSize: 'var(--font-sm)',
+                        fontWeight: 800, fontSize: 'var(--font-md)',
                         color: 'white',
+                        boxShadow: '0 0 15px rgba(249, 115, 22, 0.4)',
                     }}>
                         {user?.name?.[0]?.toUpperCase() || '?'}
                     </div>
                     <div>
-                        <div style={{ fontSize: 'var(--font-sm)', fontWeight: 600 }}>{user?.name || 'User'}</div>
-                        <div style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{role} {isOfflineActive ? '(Offline)' : ''}</div>
+                        <div style={{ fontSize: 'var(--font-sm)', fontWeight: 700, color: 'white' }}>{user?.name || 'User'}</div>
+                        <div style={{ fontSize: 'var(--font-xs)', color: 'rgba(255,255,255,0.4)', textTransform: 'capitalize' }}>{role} {isOfflineActive ? '(Offline)' : ''}</div>
                     </div>
                 </div>
                 <button onClick={() => {
                     localStorage.removeItem('offline_session');
                     signOut({ callbackUrl: '/login' });
-                }} className="btn btn-danger" style={{ width: '100%', borderRadius: 'var(--radius-full)', fontWeight: 700, gap: 'var(--space-sm)' }}>
+                }} className="btn" style={{ 
+                    width: '100%', 
+                    borderRadius: 'var(--radius-full)', 
+                    fontWeight: 800, 
+                    gap: 'var(--space-sm)',
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#ef4444'
+                }}>
                     🛑 Logout
                 </button>
             </div>
