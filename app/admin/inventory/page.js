@@ -8,22 +8,30 @@ import { formatDate } from '@/lib/utils';
 export default function InventoryPage() {
     const [items, setItems] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
+    const [containers, setContainers] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [showSupplierModal, setShowSupplierModal] = useState(false);
+    const [showContainerModal, setShowContainerModal] = useState(false);
     const [editing, setEditing] = useState(null);
+    const [editingContainer, setEditingContainer] = useState(null);
     const [loading, setLoading] = useState(true);
     const { addToast } = useToast();
 
     const emptyItem = { name: '', quantity: '', unit: 'kg', minStockLevel: 10, costPerUnit: '', supplier: '' };
     const [form, setForm] = useState(emptyItem);
     const [supplierForm, setSupplierForm] = useState({ name: '', contact: '', email: '', phone: '', address: '' });
+    const [containerForm, setContainerForm] = useState({ name: '', price: '', isAvailable: true });
 
     const fetchData = async () => {
-        const [inv, sups] = await Promise.all([
+        const [inv, sups, conts] = await Promise.all([
             fetch('/api/inventory').then(r => r.json()),
             fetch('/api/suppliers').then(r => r.json()),
+            fetch('/api/containers').then(r => r.json()),
         ]);
-        setItems(inv || []); setSuppliers(sups || []); setLoading(false);
+        setItems(inv || []); 
+        setSuppliers(sups || []); 
+        setContainers(conts || []);
+        setLoading(false);
     };
 
     useEffect(() => { fetchData(); }, []);
@@ -70,6 +78,31 @@ export default function InventoryPage() {
         await fetch('/api/suppliers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(supplierForm) });
         addToast('Supplier added', 'success'); setShowSupplierModal(false); setSupplierForm({ name: '', contact: '', email: '', phone: '', address: '' }); fetchData();
     };
+    
+    const saveContainer = async (e) => {
+        e.preventDefault();
+        const method = editingContainer ? 'PUT' : 'POST';
+        const data = editingContainer ? { id: editingContainer._id, ...containerForm } : containerForm;
+        
+        await fetch('/api/containers', { 
+            method, 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify(data) 
+        });
+        
+        addToast(editingContainer ? 'Container updated' : 'Container added', 'success');
+        setShowContainerModal(false);
+        setEditingContainer(null);
+        setContainerForm({ name: '', price: '', isAvailable: true });
+        fetchData();
+    };
+
+    const deleteContainer = async (id) => {
+        if (!confirm('Delete this container type?')) return;
+        await fetch(`/api/containers?id=${id}`, { method: 'DELETE' });
+        addToast('Container deleted', 'success');
+        fetchData();
+    };
 
     const lowStock = items.filter(i => i.quantity <= i.minStockLevel);
     if (loading) return <LoadingAnimation />;
@@ -78,12 +111,13 @@ export default function InventoryPage() {
         <div className="animate-fadeIn">
             <div className="page-header">
                 <div>
-                    <h1>Inventory</h1>
-                    <p className="subtitle">{items.length} items tracked • {lowStock.length} low stock alerts</p>
+                    <h1>Inventory & Packaging</h1>
+                    <p className="subtitle">{items.length} items tracked • {containers.length} container types</p>
                 </div>
                 <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                    <button onClick={() => setShowSupplierModal(true)} className="btn btn-secondary">+ Supplier</button>
-                    <button onClick={() => { setEditing(null); setForm(emptyItem); setShowModal(true); }} className="btn btn-primary">+ Add Stock</button>
+                    <button onClick={() => setShowSupplierModal(true)} className="btn btn-secondary btn-sm">+ Supplier</button>
+                    <button onClick={() => { setEditingContainer(null); setContainerForm({ name: '', price: '', isAvailable: true }); setShowContainerModal(true); }} className="btn btn-secondary btn-sm">+ Container</button>
+                    <button onClick={() => { setEditing(null); setForm(emptyItem); setShowModal(true); }} className="btn btn-primary btn-sm">+ Add Stock</button>
                 </div>
             </div>
 
@@ -124,6 +158,53 @@ export default function InventoryPage() {
                 </div>
             </div>
 
+            <div className="grid grid-2" style={{ marginTop: 'var(--space-xl)' }}>
+                {/* Containers Management */}
+                <div className="card">
+                    <h3 style={{ fontWeight: 800, marginBottom: 'var(--space-md)', color: 'var(--accent-primary)' }}>📦 Parcel Containers (Selling)</h3>
+                    <div className="table-responsive">
+                        <table className="data-table">
+                            <thead><tr><th>Name</th><th>Selling Price</th><th>Status</th><th>Action</th></tr></thead>
+                            <tbody>
+                                {containers.map(c => (
+                                    <tr key={c._id}>
+                                        <td style={{ fontWeight: 600 }}>{c.name}</td>
+                                        <td style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>₹{c.price}</td>
+                                        <td>
+                                            <span className={`badge ${c.isAvailable ? 'badge-success' : 'badge-danger'}`}>
+                                                {c.isAvailable ? 'In Use' : 'Disabled'}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: 'var(--space-xs)' }}>
+                                                <button onClick={() => { setEditingContainer(c); setContainerForm(c); setShowContainerModal(true); }} className="btn btn-ghost btn-sm">✏️</button>
+                                                <button onClick={() => deleteContainer(c._id)} className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }}>🗑️</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Suppliers Shortlist */}
+                <div className="card">
+                    <h3 style={{ fontWeight: 800, marginBottom: 'var(--space-md)' }}>🤝 Active Suppliers</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                        {suppliers.map(s => (
+                            <div key={s._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)' }}>
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>{s.name}</div>
+                                    <div style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}>{s.phone}</div>
+                                </div>
+                                <div style={{ fontSize: '10px', color: 'var(--info)' }}>{s.contact}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
             <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editing ? 'Edit Stock' : 'Add Stock'}>
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
                     <div className="input-group"><label>Name</label><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
@@ -156,6 +237,19 @@ export default function InventoryPage() {
                     <div className="input-group"><label>Email</label><input type="email" value={supplierForm.email} onChange={e => setSupplierForm({ ...supplierForm, email: e.target.value })} /></div>
                     <div className="input-group"><label>Address</label><textarea value={supplierForm.address} onChange={e => setSupplierForm({ ...supplierForm, address: e.target.value })} rows={2} /></div>
                     <button type="submit" className="btn btn-primary">Save</button>
+                </form>
+            </Modal>
+
+            <Modal isOpen={showContainerModal} onClose={() => setShowContainerModal(false)} title={editingContainer ? 'Edit Container' : 'Add Container'} width="400px">
+                <form onSubmit={saveContainer} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+                    <div className="input-group"><label>Container Name</label><input value={containerForm.name} onChange={e => setContainerForm({ ...containerForm, name: e.target.value })} placeholder="e.g. Biryani Large Box" required /></div>
+                    <div className="input-group"><label>Selling Price (₹)</label><input type="number" value={containerForm.price} onChange={e => setContainerForm({ ...containerForm, price: e.target.value })} required min="0" step="0.01" /></div>
+                    <div className="input-group">
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                            <input type="checkbox" checked={containerForm.isAvailable} onChange={e => setContainerForm({ ...containerForm, isAvailable: e.target.checked })} /> Active & Available in POS
+                        </label>
+                    </div>
+                    <button type="submit" className="btn btn-primary">{editingContainer ? 'Update' : 'Save'}</button>
                 </form>
             </Modal>
         </div>

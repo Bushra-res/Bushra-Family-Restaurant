@@ -72,12 +72,13 @@ export async function GET(req) {
             category: categories.find(c => String(c._id) === String(item.category)) || item.category,
         }));
 
-        // Sort by salesCount if available, otherwise by name
-        if (!minimal) {
-            populatedMenu.sort((a, b) => b.salesCount - a.salesCount);
-        } else {
-            populatedMenu.sort((a, b) => a.name.localeCompare(b.name));
-        }
+        // Sort by code (numeric triage)
+        populatedMenu.sort((a, b) => {
+            const codeA = parseInt(a.code) || 999;
+            const codeB = parseInt(b.code) || 999;
+            if (codeA !== codeB) return codeA - codeB;
+            return a.name.localeCompare(b.name);
+        });
 
         if (isPaged) {
             return NextResponse.json({

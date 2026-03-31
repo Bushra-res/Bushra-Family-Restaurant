@@ -80,24 +80,22 @@ export default function AdminDashboard() {
                 </div>
                 <div style={{ 
                     display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'flex-end', 
+                    flexWrap: 'wrap',
+                    alignItems: 'center', 
                     gap: 'var(--space-sm)',
-                    width: '100%',
-                    maxWidth: typeof window !== 'undefined' && window.innerWidth <= 768 ? '100%' : 'auto'
+                    justifyContent: 'flex-end',
+                    flex: 1
                 }}>
-                    <div style={{ display: 'flex', gap: 'var(--space-xs)', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%' }}>
-                        {['daily', 'weekly', 'monthly', 'yearly'].map(p => (
-                            <button key={p} className={`btn ${period === p ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-                                onClick={() => setPeriod(p)} style={{ textTransform: 'capitalize', flex: '1 0 auto' }}>{p}</button>
-                        ))}
-                        <button onClick={downloadCSV} className="btn btn-success btn-sm" style={{ flex: '1 0 auto' }}>📥 Export CSV</button>
-                    </div>
+                    {['daily', 'weekly', 'monthly', 'yearly'].map(p => (
+                        <button key={p} className={`btn ${period === p ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+                            onClick={() => setPeriod(p)} style={{ textTransform: 'capitalize' }}>{p}</button>
+                    ))}
+                    <button onClick={downloadCSV} className="btn btn-success btn-sm">📥 Export CSV</button>
                     <button 
                         className="btn btn-secondary btn-sm" 
                         onClick={handleCleanup}
                         disabled={cleaning}
-                        style={{ color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '10px', width: '100%' }}
+                        style={{ color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '10px' }}
                     >
                         {cleaning ? '⌛ Cleaning...' : '🧹 Cleanup Sales & Expenses'}
                     </button>

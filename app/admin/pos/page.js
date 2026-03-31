@@ -73,6 +73,7 @@ export default function AdminPOS() {
     const [items, setItems] = useState([]);
     const [categories, setCategories] = useState([]);
     const [tables, setTables] = useState([]);
+    const [containers, setContainers] = useState([]); // Dynamic containers
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [search, setSearch] = useState('');
     const [cart, setCart] = useState([]);
@@ -90,10 +91,9 @@ export default function AdminPOS() {
     const [settings, setSettings] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Parcel Options State
+    // Parcel Options State (Dynamic)
     const [parcelEnabled, setParcelEnabled] = useState(false);
-    const [parcelOptions, setParcelOptions] = useState({ gravy: 0, container: 0 });
-    const PARCEL_CHARGES = { container: 10, gravy: 5 };
+    const [parcelOptions, setParcelOptions] = useState({}); // { [containerId]: quantity }
 
     const [printCountdown, setPrintCountdown] = useState(0);
 
@@ -136,11 +136,12 @@ export default function AdminPOS() {
 
             // Sync Phase: Fetch latest from API in background (Stale-While-Revalidate)
             try {
-                const [m, c, t, s] = await Promise.all([
+                const [m, c, t, s, conts] = await Promise.all([
                     fetch('/api/menu').then(r => r.json()).catch(() => null),
                     fetch('/api/categories').then(r => r.json()).catch(() => null),
                     fetch('/api/tables').then(r => r.json()).catch(() => null),
                     fetch('/api/settings').then(r => r.json()).catch(() => null),
+                    fetch('/api/containers').then(r => r.json()).catch(() => []),
                 ]);
 
                 if (m) {
@@ -154,6 +155,9 @@ export default function AdminPOS() {
                 if (t) {
                     setTables(t);
                     cacheData('tables', t);
+                }
+                if (conts) {
+                    setContainers(conts.filter(c => c.isAvailable));
                 }
                 if (s) {
                     const settingsData = Array.isArray(s) ? s[0] : s;
@@ -197,9 +201,12 @@ export default function AdminPOS() {
     const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
     const taxRate = settings?.taxPercentage || 0;
     
-    // Calculate Parcel Charges
+    // Calculate Parcel Charges dynamically
     const parcelChargesTotal = parcelEnabled 
-        ? (parcelOptions.container * PARCEL_CHARGES.container) + (parcelOptions.gravy * PARCEL_CHARGES.gravy)
+        ? Object.entries(parcelOptions).reduce((acc, [id, qty]) => {
+            const container = containers.find(c => c._id === id);
+            return acc + (container ? container.price * qty : 0);
+          }, 0)
         : 0;
 
     const tax = cart.reduce((s, i) => {
@@ -250,7 +257,7 @@ export default function AdminPOS() {
             setNotes('');
             setSelectedTable('');
             setParcelEnabled(false);
-            setParcelOptions({ gravy: 0, container: 0 });
+            setParcelOptions({});
             addToast('Order placed successfully!', 'success');
 
             // Automated Print with 2-second delay
@@ -285,6 +292,8 @@ export default function AdminPOS() {
                 setDeliveryAddress({ street: '', city: '', pincode: '' });
                 setNotes('');
                 setSelectedTable('');
+                setParcelEnabled(false);
+                setParcelOptions({});
                 setPendingSync(prev => prev + 1);
                 addToast('Saved locally (Offline). Will sync automatically.', 'warning');
             } else {
@@ -411,8 +420,17 @@ export default function AdminPOS() {
       <div class="total-row"><span>Items Subtotal</span><span>₹ ${lastOrder.subtotal.toFixed(2)}</span></div>
       ${lastOrder.parcelOptions?.charges > 0 ? `
         <div class="total-row">
-            <span>Parcel Charges ${lastOrder.parcelOptions.container > 0 ? `(Cont x${lastOrder.parcelOptions.container})` : ''} ${lastOrder.parcelOptions.gravy > 0 ? `(Gravy x${lastOrder.parcelOptions.gravy})` : ''}</span>
-            <span>₹ ${lastOrder.parcelOptions.charges.toFixed(2)}</span>
+            <span>Parcel Charges ${
+                Object.entries(lastOrder.parcelOptions || {})
+                    .filter(([k]) => k !== 'charges')
+                    .map(([id, qty]) => {
+                        const c = containers.find(x => x._id === id);
+                        return c ? `${c.name} x\${qty}` : '';
+                    })
+                    .filter(Boolean)
+                    .join(', ')
+            }</span>
+            <span>₹ \${lastOrder.parcelOptions.charges.toFixed(2)}</span>
         </div>
       ` : ''}
       ${lastOrder.tax > 0 ? `<div class="total-row"><span>GST</span><span>₹ ${lastOrder.tax.toFixed(2)}</span></div>` : ''}
@@ -687,39 +705,30 @@ export default function AdminPOS() {
                         </label>
                         
                         {parcelEnabled && (
-                            <div className="animate-fadeIn" style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-                                        <input type="checkbox" checked={parcelOptions.container > 0} 
-                                            onChange={e => setParcelOptions(prev => ({ ...prev, container: e.target.checked ? Math.max(1, prev.container) : 0 }))} 
-                                            style={{ marginRight: 6 }}
-                                        />
-                                        Container (₹{PARCEL_CHARGES.container})
+                            <div className="animate-fadeIn" style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                {containers.length === 0 ? (
+                                    <p style={{ fontSize: '10px', color: 'var(--text-muted)' }}>No containers defined in inventory.</p>
+                                ) : containers.map(container => (
+                                    <div key={container._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0' }}>
+                                        <div style={{ fontSize: '10px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <input type="checkbox" 
+                                                checked={!!parcelOptions[container._id]} 
+                                                onChange={e => setParcelOptions(prev => ({ 
+                                                    ...prev, 
+                                                    [container._id]: e.target.checked ? (prev[container._id] || 1) : 0 
+                                                }))} 
+                                            />
+                                            {container.name} (₹{container.price})
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <button onClick={() => setParcelOptions(prev => ({ ...prev, [container._id]: Math.max(0, (prev[container._id] || 0) - 1) }))}
+                                                style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--bg-card)', border: '1px solid var(--border)', fontSize: 12 }}>-</button>
+                                            <span style={{ fontSize: 'var(--font-xs)', fontWeight: 700, width: 15, textAlign: 'center' }}>{parcelOptions[container._id] || 0}</span>
+                                            <button onClick={() => setParcelOptions(prev => ({ ...prev, [container._id]: (prev[container._id] || 0) + 1 }))}
+                                                style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--bg-card)', border: '1px solid var(--border)', fontSize: 12 }}>+</button>
+                                        </div>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <button onClick={() => setParcelOptions(prev => ({ ...prev, container: Math.max(0, prev.container - 1) }))}
-                                            style={{ width: 20, height: 20, borderRadius: 4, background: 'var(--bg-card)', border: '1px solid var(--border)', fontSize: 12 }}>-</button>
-                                        <span style={{ fontSize: 'var(--font-xs)', fontWeight: 700, width: 15, textAlign: 'center' }}>{parcelOptions.container}</span>
-                                        <button onClick={() => setParcelOptions(prev => ({ ...prev, container: prev.container + 1 }))}
-                                            style={{ width: 20, height: 20, borderRadius: 4, background: 'var(--bg-card)', border: '1px solid var(--border)', fontSize: 12 }}>+</button>
-                                    </div>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-                                        <input type="checkbox" checked={parcelOptions.gravy > 0} 
-                                            onChange={e => setParcelOptions(prev => ({ ...prev, gravy: e.target.checked ? Math.max(1, prev.gravy) : 0 }))} 
-                                            style={{ marginRight: 6 }}
-                                        />
-                                        Gravy (₹{PARCEL_CHARGES.gravy})
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <button onClick={() => setParcelOptions(prev => ({ ...prev, gravy: Math.max(0, prev.gravy - 1) }))}
-                                            style={{ width: 20, height: 20, borderRadius: 4, background: 'var(--bg-card)', border: '1px solid var(--border)', fontSize: 12 }}>-</button>
-                                        <span style={{ fontSize: 'var(--font-xs)', fontWeight: 700, width: 15, textAlign: 'center' }}>{parcelOptions.gravy}</span>
-                                        <button onClick={() => setParcelOptions(prev => ({ ...prev, gravy: prev.gravy + 1 }))}
-                                            style={{ width: 20, height: 20, borderRadius: 4, background: 'var(--bg-card)', border: '1px solid var(--border)', fontSize: 12 }}>+</button>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
                         )}
                     </div>
