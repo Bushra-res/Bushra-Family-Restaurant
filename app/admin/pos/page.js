@@ -540,17 +540,6 @@ export default function AdminPOS() {
                             margin: 0,
                             letterSpacing: '-0.5px'
                         }}>BUSHRA <span style={{ color: 'var(--accent-primary)' }}>POS</span></h2>
-                        <Link 
-                            key={link.href} 
-                            href={link.href} 
-                            className={`nav-link ${pathname === link.href ? 'active' : ''}`}
-                            onClick={() => {
-                                if (window.innerWidth <= 992 && onClose) onClose();
-                            }}
-                        >
-                            <span style={{ fontSize: 18 }}>{link.icon}</span>
-                            <span>{link.label}</span>
-                        </Link>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'var(--space-xs)', padding: '4px 10px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-full)' }}>
                             <div style={{ 
                                 width: 8, height: 8, borderRadius: '50%', 
