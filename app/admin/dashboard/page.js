@@ -208,21 +208,84 @@ export default function AdminDashboard() {
                 </div>
             )}
 
-            <div className="grid grid-dashboard-main" style={{ marginBottom: 'var(--space-xl)' }}>
-                <style jsx>{`
-                    .grid-dashboard-main {
-                        display: grid;
-                        grid-template-columns: 1fr 2fr;
-                        gap: var(--space-lg);
-                    }
-                    @media (max-width: 992px) {
-                        .grid-dashboard-main {
-                            grid-template-columns: 1fr;
-                        }
-                    }
-                `}</style>
-                {/* Fast Selling Product */}
-                <div className="card card-glass" style={{ 
+            {/* Sales Channel Breakdown Pie Chart */}
+            <div className="grid grid-2" style={{ marginBottom: 'var(--space-xl)' }}>
+                <div className="card card-glass animate-slideUp">
+                    <h3 style={{ fontWeight: 700, marginBottom: 'var(--space-lg)' }}>📊 Sales Channel Breakdown</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-xl)', flexWrap: 'wrap', minHeight: 220 }}>
+                        {(() => {
+                            const dineIn = report?.ordersByType?.dine_in || 0;
+                            const parcel = (report?.ordersByType?.takeaway || 0) + (report?.ordersByType?.delivery || 0);
+                            const total = dineIn + parcel;
+                            
+                            if (total === 0) return <div style={{ color: 'var(--text-muted)' }}>No sales data available</div>;
+
+                            const dineInPct = (dineIn / total) * 100;
+                            const parcelPct = (parcel / total) * 100;
+                            
+                            // Simple SVG Circle with stroke-dasharray for 2 segments
+                            const radius = 70;
+                            const circumference = 2 * Math.PI * radius;
+                            const dineInOffset = 0;
+                            const parcelOffset = (dineInPct / 100) * circumference;
+
+                            return (
+                                <>
+                                    <div style={{ position: 'relative', width: 180, height: 180 }}>
+                                        <svg width="180" height="180" viewBox="0 0 200 200" style={{ transform: 'rotate(-90deg)' }}>
+                                            {/* Dine In Segment */}
+                                            <circle 
+                                                cx="100" cy="100" r={radius} 
+                                                fill="transparent" 
+                                                stroke="var(--accent-primary)" 
+                                                strokeWidth="35"
+                                                strokeDasharray={`${(dineInPct / 100) * circumference} ${circumference}`}
+                                                style={{ transition: 'stroke-dasharray 1s ease' }}
+                                            />
+                                            {/* Parcel Segment */}
+                                            <circle 
+                                                cx="100" cy="100" r={radius} 
+                                                fill="transparent" 
+                                                stroke="#4f46e5" 
+                                                strokeWidth="35"
+                                                strokeDasharray={`${(parcelPct / 100) * circumference} ${circumference}`}
+                                                strokeDashoffset={-parcelOffset}
+                                                style={{ transition: 'stroke-dasharray 1s ease' }}
+                                            />
+                                        </svg>
+                                        <div style={{ 
+                                            position: 'absolute', top: '50%', left: '50%', 
+                                            transform: 'translate(-50%, -50%)', 
+                                            textAlign: 'center' 
+                                        }}>
+                                            <div style={{ fontSize: 'var(--font-xl)', fontWeight: 900, color: 'var(--text-primary)' }}>{total}</div>
+                                            <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>Total Orders</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', minWidth: 150 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                            <div style={{ width: 14, height: 14, borderRadius: 4, background: 'var(--accent-primary)' }}></div>
+                                            <div>
+                                                <div style={{ fontSize: '12px', fontWeight: 700 }}>Dine-in Sales</div>
+                                                <div style={{ fontSize: '14px', fontWeight: 800 }}>{dineIn} <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500 }}>({dineInPct.toFixed(1)}%)</span></div>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                            <div style={{ width: 14, height: 14, borderRadius: 4, background: '#4f46e5' }}></div>
+                                            <div>
+                                                <div style={{ fontSize: '12px', fontWeight: 700 }}>Parcel Sales</div>
+                                                <div style={{ fontSize: '14px', fontWeight: 800 }}>{parcel} <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500 }}>({parcelPct.toFixed(1)}%)</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            );
+                        })()}
+                    </div>
+                </div>
+
+                {/* Star Product Card (Moving it here for better balance) */}
+                <div className="card card-glass animate-slideUp" style={{ 
                     position: 'relative', overflow: 'hidden', 
                     border: '1px solid rgba(249, 115, 22, 0.3)',
                     background: 'linear-gradient(145deg, rgba(249, 115, 22, 0.08), var(--bg-card))'
@@ -236,7 +299,7 @@ export default function AdminDashboard() {
                             {starItem ? starItem.name : 'No Data'}
                         </h3>
                         <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-sm)', marginBottom: 'var(--space-md)' }}>
-                            Fastest selling product
+                            Fastest selling product across all channels
                         </p>
                         <div style={{ display: 'flex', gap: 'var(--space-lg)' }}>
                             <div>
@@ -252,15 +315,29 @@ export default function AdminDashboard() {
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Top Items Table */}
+            <div className="grid grid-dashboard-main" style={{ marginBottom: 'var(--space-xl)' }}>
+                <style jsx>{`
+                    .grid-dashboard-main {
+                        display: grid;
+                        grid-template-columns: 2fr 1fr;
+                        gap: var(--space-lg);
+                    }
+                    @media (max-width: 992px) {
+                        .grid-dashboard-main {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+                `}</style>
+                {/* Top Items Table (Expanded width) */}
                 <div className="card card-glass">
                     <h3 style={{ fontWeight: 700, marginBottom: 'var(--space-md)' }}>🔥 Top Performing Menu Items</h3>
-                    <div style={{ maxHeight: 300, overflowY: 'auto', paddingRight: 8 }}>
+                    <div style={{ maxHeight: 400, overflowY: 'auto', paddingRight: 8 }}>
                         {(report?.topItems || []).length === 0 ? (
                             <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-sm)' }}>No sales data available yet</p>
                         ) : (
-                            report.topItems.slice(0, 8).map((item, i) => (
+                            report.topItems.slice(0, 10).map((item, i) => (
                                 <div key={i} style={{
                                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                     padding: '12px 0', borderBottom: '1px solid var(--border-light)',
@@ -283,48 +360,18 @@ export default function AdminDashboard() {
                         )}
                     </div>
                 </div>
-            </div>
-
-            <div className="grid grid-2" style={{ marginBottom: 'var(--space-xl)' }}>
-                {/* Order Type Breakdown */}
-                <div className="card card-glass">
-                    <h3 style={{ fontWeight: 700, marginBottom: 'var(--space-md)' }}>📊 Order Channels</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
-                        {Object.entries(report?.ordersByType || {}).map(([type, count]) => {
-                            const total = report?.totalOrders || 1;
-                            const pct = ((count / total) * 100).toFixed(0);
-                            const colors = { dine_in: '#f97316', takeaway: '#fbbf24', delivery: '#10b981' };
-                            return (
-                                <div key={type}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 'var(--font-sm)' }}>
-                                        <span style={{ textTransform: 'capitalize', fontWeight: 500 }}>{type.replace(/_/g, ' ')}</span>
-                                        <span style={{ fontWeight: 700 }}>{count} ({pct}%)</span>
-                                    </div>
-                                    <div style={{ height: 10, background: 'var(--bg-input)', borderRadius: 'var(--radius-full)', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
-                                        <div style={{ 
-                                            width: `${pct}%`, height: '100%', 
-                                            background: colors[type] || 'var(--accent-primary)', 
-                                            borderRadius: 'var(--radius-full)', 
-                                            transition: 'width 1s cubic-bezier(0.16, 1, 0.3, 1)' 
-                                        }}></div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
 
                 {/* Recent Activity Mini */}
                 <div className="card card-glass">
                     <h3 style={{ fontWeight: 700, marginBottom: 'var(--space-md)' }}>🕒 Recent Operations</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-                        {(report?.orders || []).slice(0, 6).map(order => (
+                        {(report?.orders || []).slice(0, 8).map(order => (
                             <div key={order._id} style={{ 
                                 display: 'flex', justifyContent: 'space-between', padding: '10px 14px', 
                                 background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)',
                                 border: '1px solid var(--border-light)'
                             }}>
-                                <div>
+                                <div style={{ flex: 1 }}>
                                     <div style={{ fontSize: 'var(--font-sm)', fontWeight: 600 }}>#{order.orderId}</div>
                                     <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{new Date(order.createdAt).toLocaleTimeString()} • {order.type?.replace(/_/g, ' ')}</div>
                                 </div>
@@ -339,6 +386,8 @@ export default function AdminDashboard() {
                     </div>
                 </div>
             </div>
+
+
         </div>
     );
 }
