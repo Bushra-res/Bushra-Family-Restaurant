@@ -519,6 +519,22 @@ export default function AdminPOS() {
                         grid-template-columns: 1fr 210px;
                     }
                 }
+                .menu-grid {
+                    flex: 1;
+                    overflow: auto;
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                    gap: var(--space-md);
+                    align-content: start;
+                    padding-right: 4px;
+                    padding-bottom: var(--space-2xl);
+                }
+                @media (max-width: 600px) {
+                    .menu-grid {
+                        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+                        gap: var(--space-xs) !important;
+                    }
+                }
                 .tabs {
                     display: flex;
                     gap: var(--space-xs);
@@ -610,21 +626,7 @@ export default function AdminPOS() {
                     ))}
                 </div>
 
-                <div className="menu-grid" style={{
-                    flex: 1, overflow: 'auto',
-                    display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
-                    gap: 'var(--space-md)', alignContent: 'start',
-                    paddingRight: '4px',
-                    paddingBottom: 'var(--space-2xl)'
-                }}>
-                    <style jsx>{`
-                        @media (max-width: 600px) {
-                            .menu-grid {
-                                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
-                                gap: var(--space-xs) !important;
-                            }
-                        }
-                    `}</style>
+                <div className="menu-grid">
                     {loading ? (
                         <MenuSkeleton />
                     ) : filteredItems.length === 0 ? (
