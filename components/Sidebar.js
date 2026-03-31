@@ -14,8 +14,8 @@ export default function Sidebar({ isOpen, onClose }) {
     const offlineSession = offlineSessionStr ? JSON.parse(offlineSessionStr) : null;
     const isOfflineActive = !session && offlineSession && new Date(offlineSession.expires) > new Date();
     
-    const user = session?.user || (isOfflineActive ? offlineSession : null);
-    const role = user?.role;
+    const user = session?.user || (isOfflineActive ? offlineSession : { name: 'Admin Guest', role: 'admin' });
+    const role = user?.role || 'admin';
 
     // Auto-close on mobile when path changes
     useEffect(() => {
@@ -179,7 +179,6 @@ export default function Sidebar({ isOpen, onClose }) {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 'var(--space-sm)',
-                    marginBottom: 'var(--space-md)',
                     padding: '8px',
                 }}>
                     <div style={{
@@ -197,12 +196,6 @@ export default function Sidebar({ isOpen, onClose }) {
                         <div style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{role} {isOfflineActive ? '(Offline)' : ''}</div>
                     </div>
                 </div>
-                <button onClick={() => {
-                    localStorage.removeItem('offline_session');
-                    signOut({ callbackUrl: '/login' });
-                }} className="btn btn-danger" style={{ width: '100%', borderRadius: 'var(--radius-full)', fontWeight: 700, gap: 'var(--space-sm)' }}>
-                    🛑 Logout
-                </button>
             </div>
         </aside>
     );

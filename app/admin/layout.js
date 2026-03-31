@@ -12,36 +12,12 @@ export default function AdminLayout({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     useEffect(() => {
-        const checkAuth = async () => {
-            if (status === 'loading') return;
-            
-            const offlineSessionStr = localStorage.getItem('offline_session');
-            const offlineSession = offlineSessionStr ? JSON.parse(offlineSessionStr) : null;
-            
-            // Validate offline session (e.g., expiry)
-            const isOfflineAuth = offlineSession && new Date(offlineSession.expires) > new Date();
-
-            if (status === 'unauthenticated' && !isOfflineAuth) {
-                router.push('/login');
-            }
-            
-            if (session && session.user.role !== 'admin') {
-                router.push('/');
-            } else if (!session && isOfflineAuth && offlineSession.role !== 'admin') {
-                 router.push('/');
-            }
-        };
-        
-        checkAuth();
-    }, [session, status, router]);
+        // Auth checks disabled by user request
+    }, [status, router]);
 
     if (status === 'loading') return <LoadingAnimation fullScreen={true} />;
     
-    // Check if we have an offline session even if NextAuth is not active
-    const offlineSessionStr = typeof window !== 'undefined' ? localStorage.getItem('offline_session') : null;
-    const isOfflineActive = !session && offlineSessionStr && new Date(JSON.parse(offlineSessionStr).expires) > new Date();
-
-    if (status === 'unauthenticated' && !isOfflineActive) return null;
+    // Auth requirement removed. Always allow rendering the admin dashboard.
 
     return (
         <div className={`dashboard-layout ${!isSidebarOpen ? 'sidebar-hidden' : ''}`}>
