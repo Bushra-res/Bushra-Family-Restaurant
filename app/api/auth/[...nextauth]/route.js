@@ -12,21 +12,30 @@ export const authOptions = {
                 const { email, password } = credentials;
 
                 try {
-                    const user = await db.findOne('users', { email });
+                    if (!process.env.MONGODB_URI) {
+                        console.error("❌ AUTH ERROR: MONGODB_URI is missing from environment variables.");
+                        return null;
+                    }
+
+                    const user = await db.findOne('users', { email: email.toLowerCase() });
 
                     if (!user) {
+                        console.warn(`⚠️ AUTH WARNING: Login failed. User with email ${email} NOT FOUND in database.`);
                         return null;
                     }
 
                     const passwordsMatch = await bcrypt.compare(password, user.password);
 
                     if (!passwordsMatch) {
+                        console.warn(`⚠️ AUTH WARNING: Login failed. Incorrect password for user: ${email}`);
                         return null;
                     }
 
+                    console.log(`✅ AUTH SUCCESS: User logged in: ${email}`);
                     return user;
                 } catch (error) {
-                    console.log("Error: ", error);
+                    console.error("❌ AUTH CRITICAL ERROR: ", error);
+                    return null;
                 }
             },
         }),
