@@ -15,6 +15,7 @@ export default function MenuManagement() {
     const [saving, setSaving] = useState(false);
     const [settings, setSettings] = useState(null);
     const [search, setSearch] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('all');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
@@ -31,7 +32,7 @@ export default function MenuManagement() {
         try {
             const [cats, menuRes, settingsRes] = await Promise.all([
                 fetch('/api/categories').then(r => r.json()),
-                fetch(`/api/menu?minimal=true&search=${encodeURIComponent(search)}&page=${page}&limit=${itemsPerPage}`).then(r => r.json()),
+                fetch(`/api/menu?minimal=true&search=${encodeURIComponent(search)}&category=${selectedCategory !== 'all' ? selectedCategory : ''}&page=${page}&limit=${itemsPerPage}`).then(r => r.json()),
                 fetch('/api/settings').then(r => r.json()),
             ]);
             setCategories(cats || []);
@@ -59,7 +60,7 @@ export default function MenuManagement() {
             fetchData();
         }, 300);
         return () => clearTimeout(delayDebounceFn);
-    }, [search, page]);
+    }, [search, selectedCategory, page]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -216,41 +217,105 @@ export default function MenuManagement() {
                 </div>
             </div>
 
-            {/* Categories */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-lg)', flexWrap: 'wrap' }}>
-                {categories.map(cat => (
-                    <div key={cat._id} className="badge" 
-                        style={{ 
-                            padding: '10px 14px', cursor: 'pointer', fontSize: 'var(--font-xs)',
-                            border: '1px solid var(--border)', background: '#ffffff', color: 'var(--text-secondary)',
-                            fontWeight: 700, borderRadius: 'var(--radius-md)', transition: 'var(--transition-fast)',
-                            display: 'flex', alignItems: 'center', gap: '6px', boxShadow: 'var(--shadow-sm)'
-                        }}
-                        onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.color = 'var(--accent-primary)'; }}
-                        onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-                        onClick={() => { setCatForm({ _id: cat._id, name: cat.name, description: cat.description }); setShowCatModal(true); }}>
-                        <span style={{ fontSize: '14px' }}>📂</span> {cat.name}
-                    </div>
-                ))}
-            </div>
-
-            {/* Centered Search Bar */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-lg)' }}>
-                <div style={{ position: 'relative', maxWidth: '500px', width: '100%', group: 'search' }}>
-                    <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5, fontSize: '18px' }}>🔍</span>
+            {/* Modern Search & Category Toolbar */}
+            <div style={{
+                background: '#ffffff',
+                padding: 'var(--space-md)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border)',
+                boxShadow: 'var(--shadow-md)',
+                marginBottom: 'var(--space-xl)',
+                position: 'sticky',
+                top: 0,
+                zIndex: 40,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--space-md)'
+            }}>
+                {/* Search Row */}
+                <div style={{ position: 'relative', width: '100%', maxWidth: '800px', margin: '0 auto' }}>
+                    <span style={{ 
+                        position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', 
+                        fontSize: '20px', zIndex: 1, opacity: 0.6 
+                    }}>🔍</span>
                     <input 
                         value={search} 
-                        onChange={e => setSearch(e.target.value)} 
-                        placeholder="Search by name or 3-digit code..." 
+                        onChange={e => { setSearch(e.target.value); setPage(1); }} 
+                        placeholder="Search items by name or code..." 
                         style={{ 
                             paddingLeft: '48px', 
-                            borderRadius: 'var(--radius-full)', 
-                            border: '1.5px solid var(--accent-primary)',
-                            background: '#ffffff',
+                            height: '54px',
+                            fontSize: 'var(--font-md)',
+                            borderRadius: 'var(--radius-md)', 
+                            border: '2px solid var(--border)',
+                            background: 'var(--bg-primary)',
                             fontWeight: 600,
-                            boxShadow: '0 4px 15px rgba(249, 115, 22, 0.08)'
+                            letterSpacing: '0.4px',
+                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}
+                        onFocus={e => {
+                            e.target.style.borderColor = 'var(--accent-primary)';
+                            e.target.style.background = '#ffffff';
+                            e.target.style.boxShadow = '0 0 0 4px var(--accent-glow), 0 8px 30px rgba(249, 115, 22, 0.12)';
+                        }}
+                        onBlur={e => {
+                            e.target.style.borderColor = 'var(--border)';
+                            e.target.style.background = 'var(--bg-primary)';
+                            e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)';
                         }}
                     />
+                </div>
+
+                {/* Category Bar */}
+                <div style={{ 
+                    display: 'flex', 
+                    gap: '10px', 
+                    overflowX: 'auto', 
+                    paddingBottom: '8px', 
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    WebkitOverflowScrolling: 'touch'
+                }} className="hide-scrollbar">
+                    <button 
+                        onClick={() => { setSelectedCategory('all'); setPage(1); }}
+                        style={{
+                            padding: '10px 20px',
+                            borderRadius: 'var(--radius-full)',
+                            background: selectedCategory === 'all' ? 'var(--accent-primary)' : 'var(--bg-primary)',
+                            color: selectedCategory === 'all' ? 'white' : 'var(--text-secondary)',
+                            fontWeight: 700,
+                            whiteSpace: 'nowrap',
+                            border: '1px solid',
+                            borderColor: selectedCategory === 'all' ? 'var(--accent-primary)' : 'var(--border)',
+                            transition: 'var(--transition-fast)',
+                            fontSize: 'var(--font-xs)',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        ⭐ All Categories
+                    </button>
+                    {categories.map(cat => (
+                        <button 
+                            key={cat._id}
+                            onClick={() => { setSelectedCategory(cat._id); setPage(1); }}
+                            style={{
+                                padding: '10px 20px',
+                                borderRadius: 'var(--radius-full)',
+                                background: selectedCategory === cat._id ? 'var(--accent-primary)' : 'var(--bg-primary)',
+                                color: selectedCategory === cat._id ? 'white' : 'var(--text-secondary)',
+                                fontWeight: 700,
+                                whiteSpace: 'nowrap',
+                                border: '1px solid',
+                                borderColor: selectedCategory === cat._id ? 'var(--accent-primary)' : 'var(--border)',
+                                transition: 'var(--transition-fast)',
+                                fontSize: 'var(--font-xs)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            {cat.name}
+                        </button>
+                    ))}
                 </div>
             </div>
 
