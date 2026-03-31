@@ -119,14 +119,16 @@ export default function AdminPOS() {
         const loadInitialData = async () => {
             // Instant Load Phase: Load from IndexedDB immediately
             try {
-                const [cm, cc, ct, cs] = await Promise.all([
+                const [cm, cc, ct, cs, ccon] = await Promise.all([
                     getCachedData('menuItems'), getCachedData('categories'),
-                    getCachedData('tables'), getCachedData('settings')
+                    getCachedData('tables'), getCachedData('settings'),
+                    getCachedData('containers')
                 ]);
                 
                 if (cm.length) {
                     setItems(cm); setCategories(cc); setTables(ct);
                     if (cs && cs.length) setSettings(cs[0]);
+                    if (ccon && ccon.length) setContainers(ccon.filter(c => c.isAvailable));
                     setLoading(false); // Immediate visual feedback
                     console.log('⚡ Loaded from local cache');
                 }
@@ -158,6 +160,7 @@ export default function AdminPOS() {
                 }
                 if (conts) {
                     setContainers(conts.filter(c => c.isAvailable));
+                    cacheData('containers', conts);
                 }
                 if (s) {
                     const settingsData = Array.isArray(s) ? s[0] : s;

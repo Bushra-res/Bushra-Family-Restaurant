@@ -33,6 +33,7 @@ const OrderSchema = new mongoose.Schema({
   assignedDeliveryPartner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   deliveryAddress: { type: String },
   orderNotes: { type: String },
+  parcelOptions: { type: mongoose.Schema.Types.Mixed },
   orderHistory: [{
     status: String,
     timestamp: { type: Date, default: Date.now },

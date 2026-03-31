@@ -3,7 +3,22 @@ import { NextResponse } from "next/server";
 
 export async function GET(req) {
     try {
-        const containers = await db.read('containers');
+        let containers = await db.read('containers');
+        
+        // Seed default containers if none exist
+        if (!containers || containers.length === 0) {
+            const defaultContainers = [
+                { name: 'Container Box', price: 10, isAvailable: true },
+                { name: 'Gravy Cups', price: 5, isAvailable: true }
+            ];
+            
+            for (const container of defaultContainers) {
+                await db.insert('containers', container);
+            }
+            // Re-fetch to ensure we have the IDs
+            containers = await db.read('containers');
+        }
+
         // Sort by name
         containers.sort((a, b) => a.name.localeCompare(b.name));
         return NextResponse.json(containers);

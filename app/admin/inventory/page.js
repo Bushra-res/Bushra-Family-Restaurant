@@ -28,9 +28,9 @@ export default function InventoryPage() {
             fetch('/api/suppliers').then(r => r.json()),
             fetch('/api/containers').then(r => r.json()),
         ]);
-        setItems(inv || []); 
-        setSuppliers(sups || []); 
-        setContainers(conts || []);
+        setItems(Array.isArray(inv) ? inv : []); 
+        setSuppliers(Array.isArray(sups) ? sups : []); 
+        setContainers(Array.isArray(conts) ? conts : []);
         setLoading(false);
     };
 
