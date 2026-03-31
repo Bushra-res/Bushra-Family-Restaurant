@@ -428,12 +428,12 @@ export default function AdminPOS() {
                     .filter(([k]) => k !== 'charges')
                     .map(([id, qty]) => {
                         const c = containers.find(x => x._id === id);
-                        return c ? `${c.name} x\${qty}` : '';
+                        return c ? `${c.name} x${qty}` : '';
                     })
                     .filter(Boolean)
                     .join(', ')
             }</span>
-            <span>₹ \${lastOrder.parcelOptions.charges.toFixed(2)}</span>
+            <span>₹ ${lastOrder.parcelOptions.charges.toFixed(2)}</span>
         </div>
       ` : ''}
       ${lastOrder.tax > 0 ? `<div class="total-row"><span>GST</span><span>₹ ${lastOrder.tax.toFixed(2)}</span></div>` : ''}
