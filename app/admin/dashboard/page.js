@@ -214,9 +214,10 @@ export default function AdminDashboard() {
                     <h3 style={{ fontWeight: 700, marginBottom: 'var(--space-lg)' }}>📊 Sales Channel Breakdown</h3>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-xl)', flexWrap: 'wrap', minHeight: 220 }}>
                         {(() => {
-                            const dineIn = report?.ordersByType?.dine_in || 0;
-                            const parcel = (report?.ordersByType?.takeaway || 0) + (report?.ordersByType?.delivery || 0);
-                            const total = dineIn + parcel;
+                            const validOrders = (report?.orders || []).filter(o => o.status !== 'cancelled');
+                            const parcel = validOrders.filter(o => o.parcelOptions?.charges > 0).length;
+                            const dineIn = validOrders.length - parcel;
+                            const total = validOrders.length;
                             
                             if (total === 0) return <div style={{ color: 'var(--text-muted)' }}>No sales data available</div>;
 
