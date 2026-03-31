@@ -491,24 +491,32 @@ export default function AdminPOS() {
 
                 @media (max-width: 1024px) {
                     .pos-layout {
-                        display: flex;
-                        flex-direction: column;
-                        overflow-y: auto;
-                        height: auto;
-                        min-height: 100vh;
-                        padding-bottom: 20px;
-                        gap: var(--space-lg);
+                        grid-template-columns: 1fr 300px;
+                        gap: var(--space-sm);
+                        height: calc(100vh - 130px);
                     }
                     .cart-column {
                         width: 100% !important;
-                        height: auto !important;
-                        max-height: none !important;
                     }
                 }
                 
                 @media (max-width: 768px) {
                     .pos-layout {
-                        padding-top: 10px;
+                        grid-template-columns: 1fr 280px;
+                        padding-top: 0;
+                        gap: var(--space-xs);
+                    }
+                }
+
+                @media (max-width: 600px) {
+                    .pos-layout {
+                        grid-template-columns: 1fr 240px;
+                    }
+                }
+                
+                @media (max-width: 480px) {
+                    .pos-layout {
+                        grid-template-columns: 1fr 210px;
                     }
                 }
                 .tabs {
@@ -602,13 +610,21 @@ export default function AdminPOS() {
                     ))}
                 </div>
 
-                <div style={{
+                <div className="menu-grid" style={{
                     flex: 1, overflow: 'auto',
-                    display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))',
+                    display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
                     gap: 'var(--space-md)', alignContent: 'start',
                     paddingRight: '4px',
                     paddingBottom: 'var(--space-2xl)'
                 }}>
+                    <style jsx>{`
+                        @media (max-width: 600px) {
+                            .menu-grid {
+                                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+                                gap: var(--space-xs) !important;
+                            }
+                        }
+                    `}</style>
                     {loading ? (
                         <MenuSkeleton />
                     ) : filteredItems.length === 0 ? (

@@ -512,7 +512,7 @@ textarea { resize: vertical; min-height: 80px; }
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 90;
+  z-index: 115;
   display: none;
 }
 .sidebar-overlay.active { display: block; }
