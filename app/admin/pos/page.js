@@ -370,7 +370,9 @@ export default function AdminPOS() {
         .table { width: 100%; border-collapse: collapse; font-size: 10pt; margin-top: 3mm; color: #000; }
         .table th { border-bottom: 2px solid #000; padding: 2.5mm 0; text-align: left; font-weight: 800; text-transform: uppercase; font-size: 8.5pt; letter-spacing: 0.5px; }
         .table td { padding: 2.5mm 0; vertical-align: top; font-weight: 600; }
-        .total-row { display: flex; justify-content: space-between; font-size: 11pt; margin-top: 2mm; color: #000; font-weight: 700; }
+        .total-row { display: flex; justify-content: space-between; align-items: flex-start; font-size: 11pt; margin-top: 2mm; color: #000; font-weight: 700; gap: 4mm; }
+        .total-row span:first-child { flex: 1; }
+        .total-row span:last-child { white-space: nowrap; text-align: right; }
         .qty { width: 15%; text-align: center !important; }
         .price { width: 22%; text-align: right !important; }
         .amt { width: 23%; text-align: right !important; }
@@ -449,11 +451,6 @@ export default function AdminPOS() {
       <div class="center bold" style="font-size:10pt; margin-top:3mm; letter-spacing: 0.5px; line-height: 1.5;">
         ${settings?.billFooter?.replace(/\\n/g, '<br>') || '🎉 THANK YOU FOR DINING WITH US! 🎉<br>❤️ We hope you enjoyed your meal'}
       </div>
-      
-      <div class="center" style="font-size:7pt; color: #666; margin-top: 5mm; border-top: 1px solid #eee; padding-top: 2mm;">
-        Software by buildXtechs • Printed on ${new Date().toLocaleString()}
-      </div>
-
       <script>
         window.onload = () => {
           setTimeout(() => {
