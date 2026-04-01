@@ -1,6 +1,7 @@
 'use client';
 import LoadingAnimation from '@/components/LoadingAnimation';
 import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useToast } from '@/components/Toast';
 import { formatCurrency } from '@/lib/utils';
@@ -11,10 +12,15 @@ import MenuSkeleton from '@/components/pos/MenuSkeleton';
 import { useCallback, useMemo } from 'react';
 
 export default function AdminPOS() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const editOrderId = searchParams.get('editOrder');
+    
     const [isOnline, setIsOnline] = useState(true);
     const [pendingSync, setPendingSync] = useState(0);
 
     const [itemCode, setItemCode] = useState('');
+    const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
 
     // Background Sync Logic
     useEffect(() => {
@@ -177,6 +183,59 @@ export default function AdminPOS() {
         loadInitialData();
     }, []);
 
+    useEffect(() => {
+        if (!editOrderId) return;
+        
+        const fetchEditOrder = async () => {
+            try {
+                const res = await fetch(`/api/orders/${editOrderId}`);
+                if (!res.ok) throw new Error('Failed to fetch order');
+                const order = await res.json();
+                
+                setOrderType(order.type || order.orderType || 'dine_in');
+                setPaymentMethod(order.paymentMethod || 'cash');
+                setDiscount(order.discount || 0);
+                
+                if (order.customerName && order.customerName !== 'Walk-in Customer') {
+                    setCustomerMode('custom');
+                    setCustomerName(order.customerName);
+                    setCustomerPhone(order.customerPhone || '');
+                } else {
+                    setCustomerMode('walkin');
+                }
+                
+                if (order.table || order.tableId) {
+                    setSelectedTable(order.table || order.tableId);
+                }
+                
+                if (order.orderNotes) {
+                    setNotes(order.orderNotes);
+                }
+                
+                if (order.parcelOptions && order.parcelOptions.charges > 0) {
+                    setParcelEnabled(true);
+                    const { charges, ...rest } = order.parcelOptions;
+                    setParcelOptions(rest);
+                }
+                
+                const rebuiltCart = (order.items || []).map(i => ({
+                    _id: i.menuItem || i._id,
+                    name: i.name,
+                    price: i.price,
+                    quantity: i.quantity,
+                    tax: i.tax || 0,
+                    specialInstructions: i.specialInstructions || ''
+                }));
+                setCart(rebuiltCart);
+                
+                addToast('Order loaded for editing', 'info');
+            } catch (err) {
+                addToast('Could not load order for editing', 'error');
+            }
+        };
+        fetchEditOrder();
+    }, [editOrderId]);
+
     const filteredItems = useMemo(() => {
         return items.filter(item => {
             const itemCatId = (item.category && typeof item.category === 'object') ? item.category._id : item.category;
@@ -244,13 +303,17 @@ export default function AdminPOS() {
         try {
             if (!navigator.onLine) throw new Error('offline');
 
-            const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(orderData) });
+            const methodPath = editOrderId ? `/api/orders/${editOrderId}` : '/api/orders';
+            const reqMethod = editOrderId ? 'PATCH' : 'POST';
+            
+            const res = await fetch(methodPath, { method: reqMethod, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(orderData) });
             const order = await res.json();
             
-            if (!res.ok) throw new Error(order.error || 'Failed to place order');
+            if (!res.ok) throw new Error(order.error || 'Failed to complete transaction');
             
             setLastOrder(order);
             setModalState('success');
+            setIsMobileCartOpen(false);
             setCart([]);
             setDiscount(0);
             setCustomerMode('walkin');
@@ -261,7 +324,11 @@ export default function AdminPOS() {
             setSelectedTable('');
             setParcelEnabled(false);
             setParcelOptions({});
-            addToast('Order placed successfully!', 'success');
+            addToast(editOrderId ? 'Order updated successfully!' : 'Order placed successfully!', 'success');
+
+            if (editOrderId) {
+                setTimeout(() => router.push('/admin/bills'), 1500);
+            }
 
             // Automated Print with 2-second delay
             setPrintCountdown(2);
@@ -281,12 +348,17 @@ export default function AdminPOS() {
             setTables(t || []);
         } catch (err) { 
             if (err.message === 'offline' || !navigator.onLine || err.name === 'TypeError') {
+                if (editOrderId) {
+                    addToast('Editing active orders offline is not supported.', 'error');
+                    return;
+                }
                 const offlineId = `OFF-${Date.now()}`;
                 const offlineOrder = { ...orderData, orderId: offlineId, synced: 0, createdAt: new Date().toISOString() };
                 await db.offlineOrders.add(offlineOrder);
                 
                 setLastOrder(offlineOrder);
                 setModalState('success');
+                setIsMobileCartOpen(false);
                 setCart([]);
                 setDiscount(0);
                 setCustomerMode('walkin');
@@ -499,22 +571,73 @@ export default function AdminPOS() {
                 
                 @media (max-width: 768px) {
                     .pos-layout {
-                        grid-template-columns: 1fr 280px;
+                        grid-template-columns: 1fr;
                         padding-top: 0;
                         gap: var(--space-xs);
                     }
-                }
-
-                @media (max-width: 600px) {
-                    .pos-layout {
-                        grid-template-columns: 1fr 240px;
+                    .cart-column {
+                        position: fixed !important;
+                        top: 0;
+                        right: 0;
+                        bottom: 0;
+                        height: 100% !important;
+                        width: 320px !important;
+                        max-width: 85vw !important;
+                        z-index: 1000;
+                        transform: translateX(100%);
+                        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        background: var(--bg-secondary);
+                        box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+                        border-left: 1px solid var(--border);
+                    }
+                    .cart-column.mobile-open {
+                        transform: translateX(0);
+                    }
+                    .mobile-cart-toggle {
+                        display: flex !important;
+                    }
+                    .mobile-only-close {
+                        display: flex !important;
                     }
                 }
-                
-                @media (max-width: 480px) {
-                    .pos-layout {
-                        grid-template-columns: 1fr 210px;
-                    }
+                .mobile-cart-toggle {
+                    display: none;
+                    position: fixed;
+                    bottom: 24px;
+                    right: 24px;
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    background: var(--gradient-primary);
+                    color: white;
+                    box-shadow: 0 8px 24px rgba(249, 115, 22, 0.4);
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 24px;
+                    z-index: 900;
+                    cursor: pointer;
+                    border: none;
+                    transition: transform 0.2s;
+                }
+                .mobile-cart-toggle:active {
+                    transform: scale(0.95);
+                }
+                .mobile-cart-badge {
+                    position: absolute;
+                    top: 0px;
+                    right: 0px;
+                    background: #ef4444;
+                    color: white;
+                    font-size: 12px;
+                    font-weight: 800;
+                    min-width: 22px;
+                    height: 22px;
+                    border-radius: 11px;
+                    padding: 0 6px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 2px solid white;
                 }
                 .menu-grid {
                     flex: 1;
@@ -528,8 +651,9 @@ export default function AdminPOS() {
                 }
                 @media (max-width: 600px) {
                     .menu-grid {
-                        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
-                        gap: var(--space-xs) !important;
+                        grid-template-columns: repeat(3, 1fr) !important;
+                        gap: 6px !important;
+                        padding-bottom: 100px !important;
                     }
                 }
                 .tabs {
@@ -644,13 +768,61 @@ export default function AdminPOS() {
                 </div>
             </div>
 
+            {/* Mobile Cart Overlay */}
+            {isMobileCartOpen && (
+                <div 
+                    className="mobile-overlay"
+                    onClick={() => setIsMobileCartOpen(false)}
+                    style={{
+                        position: 'fixed',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.5)',
+                        zIndex: 999
+                    }}
+                />
+            )}
+
+            {/* Mobile Cart Toggle Button */}
+            <button className="mobile-cart-toggle animate-fadeIn" onClick={() => setIsMobileCartOpen(true)}>
+                🛒
+                {cart.length > 0 && (
+                    <span className="mobile-cart-badge">{cart.reduce((s, i) => s + i.quantity, 0)}</span>
+                )}
+            </button>
+
             {/* Right: Cart & Bill */}
-            <div className="cart-column" style={{
+            <div className={`cart-column ${isMobileCartOpen ? 'mobile-open' : ''}`} style={{
                 background: 'var(--bg-secondary)', border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column',
                 overflow: 'hidden', height: '100%',
                 boxShadow: 'var(--shadow-sm)'
             }}>
+                {/* Mobile Close Button */}
+                <div className="mobile-only-close" style={{
+                    display: 'none',
+                    padding: '12px 16px',
+                    borderBottom: '1px solid var(--border)',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    background: 'var(--bg-primary)'
+                }}>
+                    <span style={{ fontWeight: 800, fontSize: 'var(--font-lg)' }}>Current Order</span>
+                    <button onClick={() => setIsMobileCartOpen(false)} style={{
+                        background: 'transparent',
+                        border: 'none',
+                        fontSize: '24px',
+                        cursor: 'pointer',
+                        color: 'var(--text-primary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 32,
+                        height: 32,
+                        borderRadius: 8,
+                        background: 'rgba(0,0,0,0.05)'
+                    }}>✕</button>
+                </div>
+
                 {/* Cart Header */}
                 <div style={{ padding: 'var(--space-md)', borderBottom: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
@@ -811,7 +983,7 @@ export default function AdminPOS() {
                     <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
                         <button onClick={() => { setCart([]); setDiscount(0); }} className="btn btn-secondary" style={{ flex: 1 }} disabled={cart.length === 0}>Clear</button>
                         <button onClick={() => setModalState('payment')} className="btn btn-primary" style={{ flex: 2 }} disabled={cart.length === 0}>
-                            Pay ₹{total.toFixed(0)}
+                            {editOrderId ? 'Update ' : 'Pay '} ₹{total.toFixed(0)}
                         </button>
                     </div>
                 </div>
