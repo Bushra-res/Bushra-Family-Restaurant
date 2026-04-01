@@ -80,6 +80,21 @@ export async function GET(req) {
             .sort((a, b) => b.count - a.count)
             .slice(0, 10);
 
+        // Income Summary across all periods unconditionally
+        const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
+        const startOfWeek = new Date(); startOfWeek.setDate(startOfWeek.getDate() - 7); startOfWeek.setHours(0, 0, 0, 0);
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        
+        const validAllOrders = allOrders.filter(o => o.status !== 'cancelled');
+        const incomeSummary = {
+            today: validAllOrders.filter(o => new Date(o.createdAt || o.date) >= startOfDay).reduce((sum, o) => sum + (Number(o.total) || 0), 0),
+            week: validAllOrders.filter(o => new Date(o.createdAt || o.date) >= startOfWeek).reduce((sum, o) => sum + (Number(o.total) || 0), 0),
+            month: validAllOrders.filter(o => new Date(o.createdAt || o.date) >= startOfMonth).reduce((sum, o) => sum + (Number(o.total) || 0), 0),
+            year: validAllOrders.filter(o => new Date(o.createdAt || o.date) >= startOfYear).reduce((sum, o) => sum + (Number(o.total) || 0), 0),
+            allTime: validAllOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0),
+        };
+
         return NextResponse.json({
             totalRevenue,
             totalExpenses,
@@ -94,7 +109,8 @@ export async function GET(req) {
             topItems,
             menuItemsCount,
             categoriesCount,
-            orders: periodOrders
+            orders: periodOrders,
+            incomeSummary
         });
     } catch (error) {
         console.error('Reports API error:', error);

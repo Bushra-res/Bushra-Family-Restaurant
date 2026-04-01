@@ -102,9 +102,146 @@ export default function AdminDashboard() {
                 </div>
             </div>
 
+            {/* Custom Dashboard Styles for better responsiveness */}
+            <style jsx>{`
+                .dash-stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: var(--space-lg);
+                    margin-bottom: var(--space-lg);
+                }
+                .dash-payment-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: var(--space-lg);
+                    margin-bottom: var(--space-lg);
+                }
+                .income-summary-grid {
+                    display: grid;
+                    grid-template-columns: repeat(5, 1fr);
+                    gap: var(--space-md);
+                }
+                .income-stat {
+                    background: var(--bg-input);
+                    padding: var(--space-md);
+                    border-radius: var(--radius-sm);
+                    border: 1px solid var(--border-light);
+                    text-align: center;
+                    transition: var(--transition);
+                }
+                .income-stat:hover {
+                    transform: translateY(-2px);
+                    border-color: var(--accent-primary);
+                    box-shadow: var(--shadow-sm);
+                }
+                .income-stat.highlight {
+                    background: var(--gradient-primary);
+                    border: none;
+                    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+                }
+                .income-label {
+                    font-size: var(--font-xs);
+                    color: var(--text-muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-bottom: 4px;
+                    font-weight: 600;
+                }
+                .income-value {
+                    font-size: var(--font-lg);
+                    font-weight: 800;
+                    color: var(--text-primary);
+                }
+                @media (max-width: 1200px) {
+                    .dash-stats-grid { grid-template-columns: repeat(2, 1fr); }
+                    .income-summary-grid { grid-template-columns: repeat(3, 1fr); }
+                    .income-stat.highlight { grid-column: span 3; }
+                }
+                @media (max-width: 768px) {
+                    .dash-stats-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
+                    .dash-payment-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
+                    .income-summary-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
+                    .income-stat.highlight { grid-column: span 2; }
+                    .income-stat { padding: var(--space-sm); }
+                    .income-value { font-size: var(--font-md); }
+                }
+                @media (max-width: 480px) {
+                    .dash-payment-grid { grid-template-columns: 1fr; }
+                }
+                /* Mobile tweaks for stat cards */
+                @media (max-width: 768px) {
+                    :global(.stat-card) {
+                        padding: 12px !important;
+                        gap: 10px !important;
+                        flex-direction: column;
+                        text-align: center;
+                        align-items: center;
+                        justify-content: flex-start;
+                    }
+                    :global(.stat-card .stat-icon) {
+                        width: 40px !important;
+                        height: 40px !important;
+                        font-size: 20px !important;
+                        margin: 0 auto;
+                    }
+                    :global(.stat-card .stat-info h3) {
+                        font-size: 11px !important;
+                    }
+                    :global(.stat-card .stat-info .stat-value) {
+                        font-size: 16px !important;
+                    }
+                    :global(.stat-card .stat-info p) {
+                        font-size: 9px !important;
+                    }
+                }
+                .grid-dashboard-main {
+                    display: grid;
+                    grid-template-columns: 2fr 1fr;
+                    gap: var(--space-lg);
+                }
+                @media (max-width: 992px) {
+                    .grid-dashboard-main {
+                        grid-template-columns: 1fr;
+                    }
+                }
+            `}</style>
+
+            {/* Total Universal Income Summary Card */}
+            <div className="card card-glass animate-slideUp" style={{ marginBottom: 'var(--space-lg)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-md)' }}>
+                    <h3 style={{ fontWeight: 800, fontSize: 'var(--font-lg)' }}>🌟 Universal Income Summary</h3>
+                    <div className="badge badge-success">Always Up-to-date</div>
+                </div>
+                <div className="income-summary-grid">
+                    <div className="income-stat">
+                        <div className="income-label">Today</div>
+                        <div className="income-value">{formatCurrency(report?.incomeSummary?.today || 0)}</div>
+                    </div>
+                    <div className="income-stat">
+                        <div className="income-label">This Week</div>
+                        <div className="income-value">{formatCurrency(report?.incomeSummary?.week || 0)}</div>
+                    </div>
+                    <div className="income-stat">
+                        <div className="income-label">This Month</div>
+                        <div className="income-value">{formatCurrency(report?.incomeSummary?.month || 0)}</div>
+                    </div>
+                    <div className="income-stat">
+                        <div className="income-label">This Year</div>
+                        <div className="income-value">{formatCurrency(report?.incomeSummary?.year || 0)}</div>
+                    </div>
+                    <div className="income-stat highlight">
+                        <div className="income-label" style={{ color: 'white' }}>Total All Time</div>
+                        <div className="income-value" style={{ color: 'white' }}>{formatCurrency(report?.incomeSummary?.allTime || 0)}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-sm)' }}>
+                <h3 style={{ fontWeight: 700, fontSize: 'var(--font-md)' }}>Period Overview (<span style={{textTransform: 'capitalize'}}>{period}</span>)</h3>
+            </div>
+
             {/* Main Financial Stats */}
-            {/* Main Financial Stats */}
-            <div className="grid grid-4" style={{ marginBottom: 'var(--space-lg)' }}>
+            <div className="dash-stats-grid">
                 <div className="stat-card premium-hover">
                     <div className="stat-icon" style={{ background: 'rgba(249,115,22,0.15)' }}>💰</div>
                     <div className="stat-info">
@@ -144,7 +281,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Payment Mode Stats */}
-            <div className="grid grid-3" style={{ marginBottom: 'var(--space-lg)' }}>
+            <div className="dash-payment-grid">
                 <div className="stat-card premium-hover">
                     <div className="stat-icon" style={{ background: 'rgba(34,197,94,0.15)' }}>💵</div>
                     <div className="stat-info">
@@ -319,18 +456,6 @@ export default function AdminDashboard() {
             </div>
 
             <div className="grid grid-dashboard-main" style={{ marginBottom: 'var(--space-xl)' }}>
-                <style jsx>{`
-                    .grid-dashboard-main {
-                        display: grid;
-                        grid-template-columns: 2fr 1fr;
-                        gap: var(--space-lg);
-                    }
-                    @media (max-width: 992px) {
-                        .grid-dashboard-main {
-                            grid-template-columns: 1fr;
-                        }
-                    }
-                `}</style>
                 {/* Top Items Table (Expanded width) */}
                 <div className="card card-glass">
                     <h3 style={{ fontWeight: 700, marginBottom: 'var(--space-md)' }}>🔥 Top Performing Menu Items</h3>
